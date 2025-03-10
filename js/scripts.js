@@ -140,56 +140,27 @@ function getBackgroundSize(input) {
 }
 
 
+// Função para extrair as cores dominantes da imagem
+function getDominantColors(imgElement) {
+    const colorThief = new ColorThief();
+    const colors = colorThief.getPalette(imgElement, 2); // Extrai 2 cores dominantes
+    return colors.map(color => `rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+}
+
 // Função para aplicar o gradiente no player
 function applyGradientToPlayer(colors) {
     const player = document.querySelector('.player');
     player.style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
 }
 
-// Função para extrair as cores dominantes da imagem
-function extractDominantColors(imgElement, numColors = 2) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Define o tamanho do canvas com base na imagem
-    canvas.width = imgElement.width;
-    canvas.height = imgElement.height;
-
-    // Desenha a imagem no canvas
-    ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
-
-    // Obtém os dados de pixels da imagem
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-    // Agrupa os pixels por cor e conta a frequência de cada cor
-    const colorCounts = {};
-    for (let i = 0; i < imageData.length; i += 4) {
-        const r = imageData[i];
-        const g = imageData[i + 1];
-        const b = imageData[i + 2];
-        const color = `${r},${g},${b}`;
-
-        if (!colorCounts[color]) {
-            colorCounts[color] = 0;
-        }
-        colorCounts[color]++;
-    }
-
-    // Ordena as cores pela frequência e seleciona as mais dominantes
-    const sortedColors = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]);
-    const dominantColors = sortedColors.slice(0, numColors).map(color => `rgb(${color})`);
-
-    return dominantColors;
-}
-
 // Quando a imagem da música é carregada, extrai as cores e aplica o gradiente
-const imgElement = document.querySelector('.player__artist img');
-if (imgElement.complete) {
-    const colors = extractDominantColors(imgElement);
+const img = document.querySelector('.player__artist img');
+if (img.complete) {
+    const colors = getDominantColors(img);
     applyGradientToPlayer(colors);
 } else {
-    imgElement.addEventListener('load', () => {
-        const colors = extractDominantColors(imgElement);
+    img.addEventListener('load', () => {
+        const colors = getDominantColors(img);
         applyGradientToPlayer(colors);
     });
 }
@@ -205,7 +176,7 @@ document.querySelectorAll('.main__col').forEach(item => {
 
         // Quando a nova imagem é carregada, extrai as cores e aplica o gradiente
         imgElement.addEventListener('load', () => {
-            const colors = extractDominantColors(imgElement);
+            const colors = getDominantColors(imgElement);
             applyGradientToPlayer(colors);
         });
     });
