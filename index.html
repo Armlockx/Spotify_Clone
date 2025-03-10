@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Spotify</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/stylesheet.css">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div class="sidebar">
+		<div class="sidebar-wraper">
+			<div class="sidebar__logo">
+				<img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_White.png" alt="Logo do Spotify">
+			</div>
+				<div class="sidebar__menu">
+					<a class="sidebar__menu__selected" href="#"><i class="fas fa-home"></i> Início</a>
+					<a href="#"><i class="fas fa-search"></i> Buscar</a>
+					<a href="#"><i class="fas fa-database"></i> Biblioteca</a>
+				</div>
+
+				<div class="sidebar__menu">
+					<p class="sidebar__menu__title">Playlists</p>
+
+					<div class="sidebar__menu__item">
+						<div class="sidebar__menu__item__component">
+							+
+						</div>
+						<span>Criar Playlist</span>
+					</div>
+
+					<div class="sidebar__menu__item">
+						<img src="https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84587ecba4a27774b2f6f07174">
+						<span>Músicas Curtidas</span>
+					</div>
+				</div>
+
+			<div class="sidebar__playlists">
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>
+            </div>
+
+            <div class="sidebar__playlists">
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>
+            </div>
+
+            <div class="sidebar__playlists">
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>         
+                <a href="">Playlist1</a>
+            </div>
+		</div>
+	</div>
+
+    <div class="main">
+        <div class="main-wraper">
+            <div class="main__row">
+                <div class="main__row__title"><h2>Paradas</h2></div>
+
+                <div class="main__col">
+                    <img src="img/top50br.jpg">
+                    <h3>As 50 mais tocadas</h3>
+                    <p>Somente as mais tocadas no Brasil!</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/matue.jpg">
+                    <h3>Matuê</h3>
+                    <p>As mais mais do job...</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/racionais.jpg">
+                    <h3>Racionais MC</h3>
+                    <p>Só pedrada na mente.</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/top50global.jpg">
+                    <h3>As 50 mais do Mundo!</h3>
+                    <p>As mais tocadas no Mundo!</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/bananeira.jpg">
+                    <h3>Bananeira</h3>
+                    <p>São só bananas!</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/dance.jpg">
+                    <h3>Dance</h3>
+                    <p>O nome diz tudo</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/deftones.jpg">
+                    <h3>Deftones</h3>
+                    <p>A coruja do nu metal</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/alex.jpg">
+                    <h3>Alex Turner</h3>
+                    <p>Submarine e outros sucessos!</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/mix2.jpg">
+                    <h3>Meu Mix 02</h3>
+                    <p>Escolhidas à dedo pra você!</p>
+                </div>
+            </div>
+
+            <div class="main__row">
+                <div class="main__row__title"><h2>Minhas músicas</h2></div>
+
+                <div class="main__col" data-image="img/dance.jpg" data-artist="The Last Shadow Puppets" data-song="Sweet Dreams, TN" data-file="assets/Sweet Dreams, TN.mp3">
+                    <img src="img/dance.jpg">
+                    <h3>Sweet Dreams, TN</h3>
+                    <p>The Last Shadow Puppets</p>
+                </div>
+
+                <div class="main__col" data-image="img/deftones.jpg" data-artist="Deftones" data-song="Change (In The House Of Flies)" data-file="assets/Deftones - Change (In The House Of Flies).mp3">
+                    <img src="img/deftones.jpg">
+                    <h3>Change (In The House Of Flies)</h3>
+                    <p>Deftones</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/alex.jpg">
+                    <h3>Alex Turner</h3>
+                    <p>Submarine e outros sucessos!</p>
+                </div>
+
+                <div class="main__col">
+                    <img src="img/mix2.jpg">
+                    <h3>Meu Mix 02</h3>
+                    <p>Escolhidas à dedo pra você!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="player">
+        <div class="player__artist">
+            
+        </div>
+        <div class="player__control">
+            <div class="player__control__buttons">
+                <a href=""><i class="fas fa-backward"></i></a>
+                <a style="display: none;" id="pauseBtn" href="#"><i class="far fa-pause-circle"></i></a>
+                <a id="playBtn" href="#"><i class="far fa-play-circle"></i></a>
+                <a href=""><i class="fas fa-forward"></i></a>
+            </div>
+
+            <div class="player__control__progress">
+                <div class="player__time__current"><span id="current__time">0:00</span></div>
+                <div id="progress__bar" class="player__control__progress2"></div>
+                <div class="player__time__total"><span id="total__time">--:--</span></div>
+            </div>
+        </div>
+        <div class="volume-container">
+                <input type="range" class="volumeControl" id="volumeControl" min="0" max="1" step="0.01" value="1">
+        </div>
+    </div>
+
+    <audio id="audioplayer" style="position: absolute; left: 0; top: 0; z-index: -999; opacity: 0;" controls="">
+    </audio>
+
+	<script src="js/all.min.js"></script>
+
+    <script>
+        var audioPlayer = document.getElementById('audioplayer');
+        var loaded = false;
+
+        var playBtn = document.getElementById('playBtn');
+        var pauseBtn = document.getElementById('pauseBtn');
+
+        const progressBar = document.getElementById('progress__bar');
+        const currentTimeDisplay = document.getElementById('current__time');
+        const totalTimeDisplay = document.getElementById('total__time');
+
+        // Atualiza a barra de progresso e o tempo atual
+        audioPlayer.addEventListener('timeupdate', () => {
+            const currentTime = audioPlayer.currentTime;
+            const duration = audioPlayer.duration;
+
+            const progressPercent = (currentTime / duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            currentTimeDisplay.textContent = formatTime(currentTime);
+        });
+
+        // Formata o tempo em minutos e segundos
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // Atualiza o tempo total quando o áudio é carregado
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+        });
+
+        // Permite clicar na barra de progresso para buscar um ponto específico
+        const progressContainer = document.querySelector('.player__control__progress');
+        progressContainer.addEventListener('click', (e) => {
+            const clickX = e.offsetX;
+            const width = progressContainer.clientWidth;
+            const seekTime = (clickX / width) * audioPlayer.duration;
+            audioPlayer.currentTime = seekTime;
+        });
+
+        // Botão de pausar
+        pauseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            playBtn.style.display = "inline";
+            pauseBtn.style.display = "none";
+            audioPlayer.pause();
+
+            return false;
+        });
+
+        // Botão de play
+        playBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            playBtn.style.display = "none";
+            pauseBtn.style.display = "inline";
+            audioPlayer.play();
+
+            return false;
+        });
+
+        // Função para tocar uma nova música
+        const playSong = (file) => {
+            // Define a nova fonte de áudio
+            audioPlayer.src = file;
+
+            // Recarrega o áudio
+            audioPlayer.load();
+
+            // Toca a nova música
+            audioPlayer.play();
+
+            // Atualiza os botões de play/pause
+            playBtn.style.display = "none";
+            pauseBtn.style.display = "inline";
+        };
+
+        // Adiciona um evento de clique a cada item da lista de músicas
+        document.querySelectorAll('.main__col').forEach(item => {
+            item.addEventListener('click', event => {
+                document.querySelectorAll('.main__col').forEach(i => i.classList.remove('active'));
+
+                item.classList.add('active');
+
+                let image = item.getAttribute('data-image');
+                let artist = item.getAttribute('data-artist');
+                let music = item.getAttribute('data-song');
+                let file = item.getAttribute('data-file');
+
+                let playerArtistComponent = document.getElementsByClassName('player__artist');
+
+                // Atualiza a imagem e o nome do artista/música
+                playerArtistComponent[0].innerHTML = `
+                    <img src="${image}" />
+                    <h3>${music}<br/><span>${artist}</span></h3>
+                `;
+
+                // Toca a nova música
+                playSong(file);
+            });
+        });
+
+        // Toca a próxima música
+        audioPlayer.addEventListener('ended', () => {
+            const currentItem = document.querySelector('.main__col.active');
+            const nextItem = currentItem.nextElementSibling;
+
+            if (nextItem) {
+                nextItem.click();
+            }
+        });
+
+        // Slide de volume
+        const volumeControl = document.getElementById('volumeControl');
+        volumeControl.addEventListener('input', () => {
+            audioPlayer.volume = volumeControl.value;
+        });
+
+        const input = document.querySelector("input");
+
+function setBackgroundSize(input) {
+  input.style.setProperty("--background-size", `${getBackgroundSize(input)}%`);
+}
+
+setBackgroundSize(input);
+
+input.addEventListener("input", () => setBackgroundSize(input));
+
+function getBackgroundSize(input) {
+  const min = +input.min || 0;
+  const max = +input.max || 100;
+  const value = +input.value;
+
+  const size = (value - min) / (max - min) * 100;
+
+  return size;
+}
+    </script>
+</body>
+</html>
