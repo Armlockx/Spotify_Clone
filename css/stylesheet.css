@@ -78,7 +78,6 @@ html, body{height: 100%;}
 	font-size: 14px;
 }
 
-
 .sidebar__menu__item__component{
 	width: 30px;
 	height: 30px;
@@ -111,14 +110,32 @@ html, body{height: 100%;}
 }
 
 .sidebar__playlists a{
-	margin: 10px 0;
-	display: block;
+	display: inline-block;
 	color: rgb(190, 190, 190);
 	text-decoration: none;
+	word-wrap: break-word;
+    width: 80%;
+	font-weight: bold;
+	font-size: 14px;
+    vertical-align: middle;
 }
 
 .sidebar__playlists a:hover{
 	color: white;
+}
+
+.sidebar__playlists__item{
+	vertical-align: middle;
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+
+.sidebar__playlists__item img{
+	width: 40px;
+	height: 40px;
+	vertical-align: middle;
+	display: inline-block;
+	border-radius: 3px;
 }
 
 /*MAIN*/
@@ -161,10 +178,14 @@ html, body{height: 100%;}
 	border-radius: 8px;
 	padding: 10px;
 	text-align: center;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  transition: 0.3s;
 }
 
 .main__col:hover {
 	background-color: #454545;
+	transform: scale(1.05);
 }
 
 .main__col h3{
@@ -180,6 +201,7 @@ html, body{height: 100%;}
 
 .main__col img{
 	width: 120px;
+    border-radius: 5px;
 	height: 120px;
 }
 
@@ -194,7 +216,7 @@ html, body{height: 100%;}
 .player{
 	width: 100%;
 	padding: 20px;
-	height: 130px;
+	height: 120px;
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -235,6 +257,8 @@ html, body{height: 100%;}
 .player__control{
 	width: 70%;
 	text-align: center;
+	    top: 10px;
+    position: relative;
 }
 
 .player__control__buttons a{
@@ -319,6 +343,24 @@ input[type='range']::-webkit-slider-thumb {
 	position: absolute;
 	right: 50px;
 }
+
+
+.playlist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 @media screen and (max-width: 1700px) {

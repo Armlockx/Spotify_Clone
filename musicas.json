@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Sweet Dreams, TN",
+        "artist": "The Last Shadow Puppets",
+        "cover": "img/dance.jpg",
+        "file": "assets/Sweet Dreams, TN.mp3"
+    },
+    {
+        "name": "Change (In The House Of Flies)",
+        "artist": "Deftones",
+        "cover": "img/deftones.jpg",
+        "file": "assets/Deftones - Change (In The House Of Flies).mp3"
+    },
+    {
+        "name": "Bananeira",
+        "artist": "The Banana Band",
+        "cover": "img/bananeira.jpg",
+        "file": "assets/Sweet Dreams, TN.mp3"
+    }
+]
