@@ -141,15 +141,6 @@ function getBackgroundSize(input) {
 }
 
 
-// Função para escurecer uma cor
-function darkenColor(color, factor = 0.8) {
-    const [r, g, b] = color.match(/\d+/g).map(Number);
-    const darkR = Math.round(r * factor);
-    const darkG = Math.round(g * factor);
-    const darkB = Math.round(b * factor);
-    return `rgb(${darkR}, ${darkG}, ${darkB})`;
-}
-
 // Função para extrair as cores dominantes com ColorThief
 function extractDominantColors(imgElement) {
     const colorThief = new ColorThief();
@@ -167,13 +158,11 @@ function applyGradientToPlayer(colors) {
 const imgElement = document.querySelector('.player__artist img');
 if (imgElement.complete) {
     const colors = extractDominantColors(imgElement);
-    const darkerColors = colors.map(color => darkenColor(color, 0.8)); // Escurece as cores
-    applyGradientToPlayer(darkerColors);
+    applyGradientToPlayer(colors);
 } else {
     imgElement.addEventListener('load', () => {
         const colors = extractDominantColors(imgElement);
-        const darkerColors = colors.map(color => darkenColor(color, 0.8)); // Escurece as cores
-        applyGradientToPlayer(darkerColors);
+        applyGradientToPlayer(colors);
     });
 }
 
@@ -189,8 +178,7 @@ document.querySelectorAll('.main__col').forEach(item => {
         // Quando a nova imagem é carregada, extrai as cores e aplica o gradiente
         imgElement.addEventListener('load', () => {
             const colors = extractDominantColors(imgElement);
-            const darkerColors = colors.map(color => darkenColor(color, 0.8)); // Escurece as cores
-            applyGradientToPlayer(darkerColors);
+            applyGradientToPlayer(colors);
         });
     });
 });
@@ -214,7 +202,7 @@ function displaySongs(songs) {
 
     songs.forEach(song => {
         const divSong = document.createElement('div');
-        divSong.classList.add('main__col');
+        divSong.classList.add("main__col");
         divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
             <h3>${song.name}<br/></h3><p>${song.artist}</p>
@@ -223,6 +211,15 @@ function displaySongs(songs) {
         divSong.addEventListener('click', () => {
             playSongNew(song);
         });
+
+        /*
+        const imgElement = divSong.querySelector('img');
+        imgElement.addEventListener('load', () => {
+            const colors = extractDominantColors(imgElement);
+            divSong.style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+        });
+        */
+
         container.appendChild(divSong);
     });
 }
@@ -238,6 +235,13 @@ function playSongNew(song) {
             <img src="${song.cover}" alt="${song.name}">
             <h3>${song.name}<br /><span>${song.artist}</span></h3>
         `;
+
+    const imgPlayer = playerArtist.querySelector('img');
+    imgPlayer.addEventListener('load', () => {
+        const colors = extractDominantColors(imgPlayer);
+        document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+    });
 }
+
 
 document.addEventListener('DOMContentLoaded', loadSongs);
