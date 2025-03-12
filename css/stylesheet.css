@@ -211,6 +211,11 @@ html, body{height: 100%;}
 	color: #fff;
 }
 
+.main__col[title] {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 
 /*	PLAYER 		*/
 

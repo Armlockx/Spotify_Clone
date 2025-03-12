@@ -188,7 +188,7 @@ document.querySelectorAll('.main__col').forEach(item => {
 
 
 // --- Carregar músicas do JSON ----
-
+// Carrega músicas
 async function loadSongs() {
     try {
         const response = await fetch('musicas.json');
@@ -199,22 +199,48 @@ async function loadSongs() {
     }
 }
 
+// Verifica campos inválidos e substitui por valores padrão
+function verifyFields(song) {
+    if (!song.name || song.name.trim() === '') {
+        song.name = 'Nome não disponível';
+    }
+    if (!song.artist || song.artist.trim() === '') {
+        song.artist = 'Artista desconhecido';
+    }
+    if (!song.cover || song.cover.trim() === '') {
+        song.cover = 'img/notFound.png';
+    }
+    if (!song.file || song.file.trim() === '') {
+        song.file = '#';
+    }
+    return song;
+}
+
+// Mostra resultados
 function displaySongs(songs) {
     const container = document.querySelector('.main__row');
 
     songs.forEach(song => {
+        song = verifyFields(song);
+
         const divSong = document.createElement('div');
         divSong.classList.add("main__col");
-        divSong.innerHTML = `
+            divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
             <h3>${song.name}<br/></h3><p>${song.artist}</p>
         `;
-
-        divSong.addEventListener('click', () => {
-            document.querySelectorAll('.main__col').forEach(i => i.classList.remove('active'));
-            divSong.classList.add('active');
-            playSongNew(song);
-        });
+        
+        if (song.file !== '#') {
+            divSong.addEventListener('click', () => {
+                document.querySelectorAll('.main__col').forEach(i => i.classList.remove('active'));
+                divSong.classList.add('active');
+                playSongNew(song);
+            });
+        } else {
+            divSong.style.opacity = '0.6';
+            divSong.title = 'Arquivo de áudio não disponível';
+        }
+        
 
         /*
         const imgElement = divSong.querySelector('img');
@@ -244,7 +270,9 @@ function playSongNew(song) {
     imgPlayer.addEventListener('load', () => {
         const colors = extractDominantColors(imgPlayer);
         document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
-    });playBtn.style.display = "none";
+    });
+
+    playBtn.style.display = "none";
     pauseBtn.style.display = "inline";
 }
 

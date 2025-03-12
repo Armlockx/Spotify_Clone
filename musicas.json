@@ -57,27 +57,42 @@
         "name": "Naïve - triple j Like A Version",
         "artist": "Tyne-James Organ",
         "cover": "img/51274.jpg",
-        "file": "assets/Naïve - triple j Like A Version.mp3"
+        "file": "assets/Naive - triple j Like A Version.mp3"
     },
     {
         "name": "O Amor Existe, Mas Não Querem Que Você Acredite",
         "artist": "Selvages à Procura de Lei",
         "cover": "img/366163.jpg",
-        "file": "assets/O Amor Existe, Mas Não Querem Que Você Acredite.mp3"
-    },{
+        "file": "assets/O Amor Existe, Mas Nao Querem Que Voce Acredite.mp3"
+    },
+    {
         "name": "Step Up the Morphine",
         "artist": "DMA'S",
         "cover": "img/145256.jpg",
         "file": "assets/Step Up the Morphine.mp3"
-    },{
+    },
+    {
         "name": "The Wooden Sky",
         "artist": "The Wooden Sky",
         "cover": "img/499308.jpg",
         "file": "assets/The Wooden Sky.mp3"
-    },{
+    },
+    {
         "name": "You Are The Right One",
         "artist": "Sports",
         "cover": "img/369693.jpg",
-        "file": "assets/You Are The Right One.mp3"
+        "file": "assets/You Are the Right One.mp3"
+    },
+    {
+        "name": "",
+        "artist": "",
+        "cover": "",
+        "file": ""
+    },
+    {
+        "name": "Love",
+        "artist": "The black Keys",
+        "cover": "img/35472.jpg",
+        "file": ""
     }
 ]
