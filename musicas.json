@@ -12,9 +12,72 @@
         "file": "assets/Deftones - Change (In The House Of Flies).mp3"
     },
     {
-        "name": "Bananeira",
-        "artist": "The Banana Band",
-        "cover": "img/bananeira.jpg",
-        "file": "assets/Sweet Dreams, TN.mp3"
+        "name": "Aviation",
+        "artist": "The Last Shadow Puppets",
+        "cover": "img/dance.jpg",
+        "file": "assets/Aviation.mp3"
+    },
+    {
+        "name": "Change You Mind",
+        "artist": "The Killers",
+        "cover": "img/461683.jpg",
+        "file": "assets/Change Your Mind.mp3"
+    },
+    {
+        "name": "Color Blind",
+        "artist": "Lil Xan",
+        "cover": "img/15542.jpg",
+        "file": "assets/Color Blind.mp3"
+    },
+    {
+        "name": "Emily",
+        "artist": "Catfish and the Bottleman",
+        "cover": "img/478456.jpg",
+        "file": "assets/Emily.mp3"
+    },
+    {
+        "name": "jealousy, jealousy",
+        "artist": "Olivia Rodrigo",
+        "cover": "img/477221.jpg",
+        "file": "assets/jealousy, jealousy.mp3"
+    },
+    {
+        "name": "Lonely Boy",
+        "artist": "The Black Keys",
+        "cover": "img/35472.jpg",
+        "file": "assets/Lonely Boy.mp3"
+    },
+    {
+        "name": "Mr. Brightside",
+        "artist": "The Killers",
+        "cover": "img/461683.jpg",
+        "file": "assets/Mr. Brightside.mp3"
+    },
+    {
+        "name": "Naïve - triple j Like A Version",
+        "artist": "Tyne-James Organ",
+        "cover": "img/51274.jpg",
+        "file": "assets/Naïve - triple j Like A Version.mp3"
+    },
+    {
+        "name": "O Amor Existe, Mas Não Querem Que Você Acredite",
+        "artist": "Selvages à Procura de Lei",
+        "cover": "img/366163.jpg",
+        "file": "assets/O Amor Existe, Mas Não Querem Que Você Acredite.mp3"
+    },{
+        "name": "Step Up the Morphine",
+        "artist": "DMA'S",
+        "cover": "img/145256.jpg",
+        "file": "assets/Step Up the Morphine.mp3"
+    },{
+        "name": "The Wooden Sky",
+        "artist": "The Wooden Sky",
+        "cover": "img/499308.jpg",
+        "file": "assets/The Wooden Sky.mp3"
+    },{
+        "name": "You Are The Right One",
+        "artist": "Sports",
+        "cover": "img/369693.jpg",
+        "file": "assets/You Are The Right One.mp3"
     }
 ]

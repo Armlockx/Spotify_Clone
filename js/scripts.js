@@ -78,6 +78,7 @@ const playSong = (file) => {
     pauseBtn.style.display = "inline";
 };
 
+/*
 // Adiciona um evento de clique a cada item da lista de músicas
 document.querySelectorAll('.main__col').forEach(item => {
     item.addEventListener('click', event => {
@@ -102,6 +103,7 @@ document.querySelectorAll('.main__col').forEach(item => {
         playSong(file);
     });
 });
+*/
 
 // Toca a próxima música
 audioPlayer.addEventListener('ended', () => {
@@ -209,6 +211,8 @@ function displaySongs(songs) {
         `;
 
         divSong.addEventListener('click', () => {
+            document.querySelectorAll('.main__col').forEach(i => i.classList.remove('active'));
+            divSong.classList.add('active');
             playSongNew(song);
         });
 
@@ -240,7 +244,8 @@ function playSongNew(song) {
     imgPlayer.addEventListener('load', () => {
         const colors = extractDominantColors(imgPlayer);
         document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
-    });
+    });playBtn.style.display = "none";
+    pauseBtn.style.display = "inline";
 }
 
 

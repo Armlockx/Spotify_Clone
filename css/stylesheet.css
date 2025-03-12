@@ -118,6 +118,7 @@ html, body{height: 100%;}
 	font-weight: bold;
 	font-size: 14px;
     vertical-align: middle;
+        padding: 0 10px;
 }
 
 .sidebar__playlists a:hover{
