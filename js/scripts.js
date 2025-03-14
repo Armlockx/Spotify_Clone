@@ -142,6 +142,15 @@ function getBackgroundSize(input) {
   return size;
 }
 
+function isLightColor(rgb) {
+    const [r, g, b] = rgb.match(/\d+/g).map(Number);
+
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+    const threshold = 0.5;
+
+    return luminance > threshold;
+}
 
 // Função para extrair as cores dominantes com ColorThief
 function extractDominantColors(imgElement) {
@@ -153,7 +162,18 @@ function extractDominantColors(imgElement) {
 // Função para aplicar o gradiente no player
 function applyGradientToPlayer(colors) {
     const player = document.querySelector('.player');
-    player.style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+    const songTitle = document.querySelector('.song__title');
+
+    // Testa se a cor é escura ou clara para aplicar o contrário da cor do título
+    if (isLightColor(colors[1])) {
+        player.style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+        songTitle.style.color = colors[1];
+    } 
+    else if (isLightColor(colors[0]) && songTitle !== null){
+        player.style.background = `linear-gradient(45deg, ${colors[1]}, ${colors[0]})`;
+        songTitle.style.color = colors[0];
+    }
+    console.log(colors, 'Color1: ', isLightColor(colors[0]), 'Color2: ', isLightColor(colors[1]));
 }
 
 // Quando a imagem da música é carregada, extrai as cores e aplica o gradiente
@@ -263,13 +283,14 @@ function playSongNew(song) {
 
     playerArtist.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
-            <h3>${song.name}<br /><span>${song.artist}</span></h3>
+            <h3 class="song__title">${song.name}<br /><span>${song.artist}</span></h3>
         `;
 
     const imgPlayer = playerArtist.querySelector('img');
     imgPlayer.addEventListener('load', () => {
         const colors = extractDominantColors(imgPlayer);
-        document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+        //document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
+        applyGradientToPlayer(colors);
     });
 
     playBtn.style.display = "none";
