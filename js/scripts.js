@@ -299,3 +299,25 @@ function playSongNew(song) {
 
 
 document.addEventListener('DOMContentLoaded', loadSongs);
+
+/*
+function showHideSearch() {
+    var searchBar = document.getElementById("search__bar");
+
+    if (searchBar.style.display === "none") {
+        searchBar.style.display = "block";
+    } else {
+        searchBar.style.display = "none";
+    }
+}
+*/
+
+const toggleSearchBtn = document.getElementById("toggleSearchBarBtn");
+const searchBar = document.getElementById("search__bar");
+const sidebarSearch = document.getElementById("toggleSearchBarBtn");
+
+
+toggleSearchBtn.addEventListener('click', () => {
+    searchBar.classList.toggle('active');
+
+});

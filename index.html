@@ -11,6 +11,11 @@
     <link rel="icon" type="image/x-icon" href="img/spotify.png">
 </head>
 <body>
+    <div id="search__bar" class="search__bar">
+        <input type="text" name="search__bar" placeholder='Qual música deseja buscar?'>
+        <i class="fas fa-search search-icon"></i>
+    </div>
+
 	<div class="sidebar">
 		<div class="sidebar-wraper">
 			<div class="sidebar__logo">
@@ -20,7 +25,7 @@
 			</div>
 				<div class="sidebar__menu">
 					<a class="sidebar__menu__selected" href="#"><i class="fas fa-home"></i> Início</a>
-					<a href="#"><i class="fas fa-search"></i> Buscar</a>
+					<a href="#" class="sidebar__search" id="toggleSearchBarBtn"><i class="fas fa-search searchBtn"></i> Buscar</a>
 					<a href="#"><i class="fas fa-database"></i> Biblioteca</a>
 				</div>
 
@@ -97,7 +102,6 @@
         <div class="main-wraper">
             <div class="main__row">
                 <div class="main__row__title"><h2>Minhas músicas (funcionando)</h2></div>
-
             </div>
 
             <div class="main__row">
