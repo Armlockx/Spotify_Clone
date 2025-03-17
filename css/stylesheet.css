@@ -254,6 +254,19 @@ html, body{height: 100%;}
 	margin-bottom: 20px;
 }
 
+.libraryHeader {
+    display: flex;
+    /* align-items: center; */
+    justify-content: space-between;
+}
+
+.libraryHeader span {
+	color: white;
+	    padding-left: 10px;
+    padding-right: 10px;
+
+}
+
 .songRow{
     cursor: pointer;
     width: 100%;
