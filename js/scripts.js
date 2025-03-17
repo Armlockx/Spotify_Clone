@@ -214,6 +214,7 @@ async function loadSongs() {
         const response = await fetch('musicas.json');
         const songs = await response.json();
         displaySongs(songs);
+        displayLibrarySongs(songs);
     } catch(error) {
         console.error('Erro ao carregar: ', error);
     }
@@ -260,15 +261,6 @@ function displaySongs(songs) {
             divSong.style.opacity = '0.6';
             divSong.title = 'Arquivo de áudio não disponível';
         }
-        
-
-        /*
-        const imgElement = divSong.querySelector('img');
-        imgElement.addEventListener('load', () => {
-            const colors = extractDominantColors(imgElement);
-            divSong.style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
-        });
-        */
 
         container.appendChild(divSong);
     });
@@ -289,7 +281,6 @@ function playSongNew(song) {
     const imgPlayer = playerArtist.querySelector('img');
     imgPlayer.addEventListener('load', () => {
         const colors = extractDominantColors(imgPlayer);
-        //document.querySelector('.player').style.background = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
         applyGradientToPlayer(colors);
     });
 
@@ -300,24 +291,81 @@ function playSongNew(song) {
 
 document.addEventListener('DOMContentLoaded', loadSongs);
 
-/*
-function showHideSearch() {
-    var searchBar = document.getElementById("search__bar");
 
-    if (searchBar.style.display === "none") {
-        searchBar.style.display = "block";
-    } else {
-        searchBar.style.display = "none";
-    }
-}
-*/
 
 const toggleSearchBtn = document.getElementById("toggleSearchBarBtn");
 const searchBar = document.getElementById("search__bar");
 const sidebarSearch = document.getElementById("toggleSearchBarBtn");
+const sidebarMenuSelected = document.getElementById("sidebarMenuSelected");
+const sidebarLibrary = document.getElementById("sidebarLibrary");
+const library = document.getElementById("library");
+
+
+const mainWraper = document.getElementById("mainWraper");
 
 
 toggleSearchBtn.addEventListener('click', () => {
     searchBar.classList.toggle('active');
+    sidebarSearch.classList.toggle('active');
+    sidebarLibrary.classList.remove('active');
+    sidebarMenuSelected.classList.add('active');
+});
 
+sidebarMenuSelected.addEventListener('click', () => {
+    searchBar.classList.remove('active');
+    sidebarSearch.classList.remove('active');
+    sidebarLibrary.classList.remove('active');
+    sidebarMenuSelected.classList.remove('active');
+
+    library.style.display = 'none';
+    mainWraper.style.display = 'block';
+});
+
+sidebarLibrary.addEventListener('click', () => {
+    sidebarMenuSelected.classList.add('active');
+    searchBar.classList.remove('active');
+    sidebarSearch.classList.remove('active');
+    sidebarLibrary.classList.add('active');
+
+    library.style.display = 'block';
+    mainWraper.style.display = 'none';
+});
+
+/*  LIBRARY     */
+
+function displayLibrarySongs(songs) {
+    const library = document.querySelector('.library');
+
+    songs.forEach(song => {
+        song = verifyFields(song);
+
+        const divSong = document.createElement('div');
+        divSong.classList.add("songRow");
+            divSong.innerHTML = `
+            <img src="${song.cover}" alt="${song.name}">
+            <h3>${song.name}<br/></h3><p>${song.artist}</p>
+        `;
+        
+        if (song.file !== '#') {
+            divSong.addEventListener('click', () => {
+                document.querySelectorAll('.songRow').forEach(i => i.classList.remove('active'));
+                divSong.classList.add('active');
+                playSongNew(song);
+            });
+        } else {
+            divSong.style.opacity = '0.6';
+            divSong.title = 'Arquivo de áudio não disponível';
+        }
+
+        library.appendChild(divSong);
+    });
+}
+
+audioPlayer.addEventListener('ended', () => {
+    const currentItem = document.querySelector('.songRow.active');
+    const nextItem = currentItem.nextElementSibling;
+
+    if (nextItem) {
+        nextItem.click();
+    }
 });

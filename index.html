@@ -24,9 +24,9 @@
                 </a>
 			</div>
 				<div class="sidebar__menu">
-					<a class="sidebar__menu__selected" href="#"><i class="fas fa-home"></i> Início</a>
+					<a href="#" class="sidebar__menu__selected" id="sidebarMenuSelected"><i class="fas fa-home"></i> Início</a>
 					<a href="#" class="sidebar__search" id="toggleSearchBarBtn"><i class="fas fa-search searchBtn"></i> Buscar</a>
-					<a href="#"><i class="fas fa-database"></i> Biblioteca</a>
+					<a href="#library" class="sidebar__library" id="sidebarLibrary"><i class="fas fa-database"></i> Biblioteca</a>
 				</div>
 
 				<div class="sidebar__menu">
@@ -99,7 +99,7 @@
 	</div>
 
     <div class="main">
-        <div class="main-wraper">
+        <div class="main-wraper" id="mainWraper">
             <div class="main__row">
                 <div class="main__row__title"><h2>Minhas músicas (funcionando)</h2></div>
             </div>
@@ -161,6 +161,10 @@
                     <p>Escolhidas à dedo pra você!</p>
                 </div>
             </div>
+        </div>
+
+        <div class="library" id="library">
+            <h2>Minha Biblioteca</h2>
         </div>
     </div>
 
