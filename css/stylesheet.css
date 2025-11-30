@@ -62,13 +62,14 @@ html, body{height: 100%;}
 
 .sidebar__menu  .sidebar__menu__selected{
 	color: white;
-	background-color: rgb(80, 80, 80);
+	background-color: transparent;
 	border-radius: 5px;
 }
 
 .sidebar__menu__selected.active {
-	color: rgb(190, 190, 190);
-	background-color: rgb(0, 0, 0);
+	/* Não usar preto absoluto — usar um tom escuro de cinza consistente */
+	color: white;
+	background-color: rgb(50, 50, 50);
 	border-radius: 5px;
 }
 
@@ -79,19 +80,54 @@ html, body{height: 100%;}
 	padding: 8px 8px;
 }
 
-.sidebar__menu__item:hover{
+.sidebar__menu__item:not(.active):hover,
+.sidebar__menu__selected:not(.active):hover{
 	background-color: rgb(80, 80, 80);
 }
 
-.sidebar__search:hover,
-.sidebar__library:hover {
+/* Smooth transitions and focus styles */
+.sidebar__menu__item,
+.sidebar__menu__selected,
+.sidebar__search,
+.sidebar__library {
+	transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+/* Hover for non-active items */
+.sidebar__search:not(.active):hover,
+.sidebar__library:not(.active):hover {
 	background-color: rgb(50, 50, 50);
 }
 
+/* Active item appearance with left accent bar */
+.sidebar__menu__item.active,
+.sidebar__menu__selected.active,
 .sidebar__search.active,
 .sidebar__library.active {
-	background-color: rgb(80, 80, 80);
+	background-color: rgb(60, 60, 60);
 	color: white;
+	position: relative;
+}
+ .sidebar__menu__item.active::before,
+.sidebar__menu__selected.active::before,
+.sidebar__search.active::before,
+.sidebar__library.active::before {
+	content: '';
+	position: absolute;
+	left: 8px;
+	top: 8px;
+	bottom: 8px;
+	width: 4px;
+	background: #1DB954; /* green accent */
+	border-radius: 3px;
+}
+/* keyboard focus visible */
+.sidebar__menu__item:focus,
+.sidebar__menu__selected:focus,
+.sidebar__search:focus,
+.sidebar__library:focus {
+	outline: 2px solid rgba(29,185,84,0.12);
+	outline-offset: 2px;
 }
 
 .sidebar__menu p.sidebar__menu__title{
@@ -176,9 +212,17 @@ html, body{height: 100%;}
 	border-radius: 5px;
 }
 
-.sidebar__playlists__item:hover{
+.sidebar__playlists__item:not(.active):hover{
 	background-color: rgb(80, 80, 80);
-	
+}
+
+/* quando a sidebar tem a classe suppress-hover, não aplicar hover em itens não-ativos */
+.sidebar.suppress-hover .sidebar__menu__selected:not(.active):hover,
+.sidebar.suppress-hover .sidebar__menu__item:not(.active):hover,
+.sidebar.suppress-hover .sidebar__search:not(.active):hover,
+.sidebar.suppress-hover .sidebar__library:not(.active):hover,
+.sidebar.suppress-hover .sidebar__playlists__item:not(.active):hover {
+	background-color: transparent;
 }
 
 .sidebar__playlists__item img{
@@ -209,8 +253,18 @@ html, body{height: 100%;}
 	margin-bottom: 40px;
 }
 
-.main-wraper{
+main-wraper{
 	padding-bottom: 200px;
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
+	transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.main-wraper.hidden{
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(6px);
 }
 
 .main__row__title{
@@ -252,9 +306,9 @@ html, body{height: 100%;}
 }
 
 .main__col img{
-	width: 120px;
+	    width: 100%;
     border-radius: 5px;
-	height: 120px;
+    height: auto;
 }
 
 .main__col.active {
@@ -269,19 +323,34 @@ html, body{height: 100%;}
 
 /*	LIBRARY	*/
 .library {
-	padding-bottom: 200px;
+	padding-bottom: 250px;
 	padding-top: 20px;
 	padding-left: 50px;
 	padding-right: 50px;
-	display: none;
-	width: 100%;
-	min-height: 100vh;
-	overflow-y: auto;
-	position: relative;
+	width: calc(100% - 250px);
+	min-height: calc(100vh - 100px);
+	overflow-y: scroll;
+	position: absolute;
+	left: 250px;
+	top: 0;
+	background-color: rgb(30, 30, 30);
+	background-image: linear-gradient(0deg, #000000, #282828);
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(6px);
+	transition: opacity 220ms ease, transform 220ms ease;
 }
 
 .library.active {
-	display: block;
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
+}
+
+.library.active {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
 }
 
 .library h2 {

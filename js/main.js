@@ -49,6 +49,8 @@ function initializeSidebarNavigation() {
         return;
     }
 
+    const sidebarEl = document.querySelector('.sidebar');
+
     /**
      * Estado global do navegador
      */
@@ -65,14 +67,16 @@ function initializeSidebarNavigation() {
         sidebarLibrary.classList.remove('active');
         searchBar.classList.remove('active');
         library.classList.remove('active');
-        if (mainWraper) mainWraper.style.display = 'none';
+        if (mainWraper) mainWraper.classList.add('hidden');
     }
 
     /**
      * Função para navegar para uma página
      */
     function navigateTo(page) {
-        if (menuState.currentPage === page) return; // Evita redundância
+        if (menuState.currentPage === page) {
+            return; // Evita redundância - sai sem fazer nada
+        }
 
         clearAllStates();
         menuState.currentPage = page;
@@ -80,13 +84,13 @@ function initializeSidebarNavigation() {
         switch (page) {
             case 'inicio':
                 sidebarMenuSelected.classList.add('active');
-                if (mainWraper) mainWraper.style.display = 'block';
+                if (mainWraper) mainWraper.classList.remove('hidden');
                 break;
 
             case 'buscar':
                 toggleSearchBarBtn.classList.add('active');
                 searchBar.classList.add('active');
-                if (mainWraper) mainWraper.style.display = 'block';
+                if (mainWraper) mainWraper.classList.remove('hidden');
                 break;
 
             case 'biblioteca':
@@ -95,7 +99,14 @@ function initializeSidebarNavigation() {
                 break;
         }
 
-        console.log('Navegando para:', page);
+        // Quando Início ou Biblioteca estiverem ativos, suprimir hover em outros itens
+        if (sidebarEl) {
+            if (page === 'inicio' || page === 'biblioteca') {
+                sidebarEl.classList.add('suppress-hover');
+            } else {
+                sidebarEl.classList.remove('suppress-hover');
+            }
+        }
     }
 
     // Event Listeners
@@ -116,8 +127,39 @@ function initializeSidebarNavigation() {
 
     sidebarLibrary.addEventListener('click', (e) => {
         e.preventDefault();
+        // Se já está em biblioteca, apenas manter (ou pode fazer toggle se preferir)
+        // Por agora, apenas navega normalmente (a verificação de redundância evita reset)
         navigateTo('biblioteca');
     });
+
+    // Keyboard navigation (Arrow Up/Down, Home, End)
+    if (sidebarEl) {
+        sidebarEl.addEventListener('keydown', (e) => {
+            const focusableSelector = 'a, button, [tabindex]:not([tabindex="-1"])';
+            const items = Array.from(sidebarEl.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
+            if (!items.length) return;
+            const idx = items.indexOf(document.activeElement);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = items[(idx + 1) % items.length] || items[0];
+                next.focus();
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = items[(idx - 1 + items.length) % items.length] || items[items.length - 1];
+                prev.focus();
+            }
+            if (e.key === 'Home') {
+                e.preventDefault();
+                items[0].focus();
+            }
+            if (e.key === 'End') {
+                e.preventDefault();
+                items[items.length - 1].focus();
+            }
+        });
+    }
 
     // Inicializa na página "Início"
     navigateTo('inicio');

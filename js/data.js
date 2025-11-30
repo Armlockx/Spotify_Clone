@@ -70,6 +70,8 @@ export function displayLibrarySongs(songs) {
 
         const divSong = document.createElement('div');
         divSong.classList.add('songRow');
+
+        // duration value (may be 0 if not known)
         const duration = song.duration || 0;
         const minutes = Math.floor(duration / 60);
         const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
@@ -77,8 +79,8 @@ export function displayLibrarySongs(songs) {
         divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
             <h3>${song.name}</h3>
-            <p>${song.artist}</p>
-            <p>${minutes}:${seconds}</p>
+            <p class="songArtist">${song.artist}</p>
+            <p class="songDuration">${minutes}:${seconds}</p>
         `;
 
         if (song.file !== '#') {
@@ -87,6 +89,29 @@ export function displayLibrarySongs(songs) {
                 divSong.classList.add('active');
                 playSongNew(song);
             });
+            // If duration is zero, try to load metadata to get real duration
+            const durationEl = divSong.querySelector('.songDuration');
+            if (durationEl && (!song.duration || song.duration === 0)) {
+                try {
+                    const audio = new Audio();
+                    audio.preload = 'metadata';
+                    audio.src = song.file;
+                    audio.addEventListener('loadedmetadata', () => {
+                        const d = Math.floor(audio.duration);
+                        song.duration = d;
+                        durationEl.textContent = formatSongDuration(d);
+                        // release resource
+                        audio.src = '';
+                    }, { once: true });
+                    audio.addEventListener('error', () => {
+                        // keep 0:00 on error
+                        audio.src = '';
+                    }, { once: true });
+                } catch (err) {
+                    // ignore metadata errors
+                    console.warn('Não foi possível carregar metadata de:', song.file, err);
+                }
+            }
         } else {
             divSong.style.opacity = '0.6';
             divSong.title = 'Arquivo de áudio não disponível';

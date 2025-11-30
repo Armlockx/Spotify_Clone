@@ -299,43 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-const toggleSearchBtn = document.getElementById("toggleSearchBarBtn");
-const searchBar = document.getElementById("search__bar");
-const sidebarSearch = document.getElementById("toggleSearchBarBtn");
-const sidebarMenuSelected = document.getElementById("sidebarMenuSelected");
-const sidebarLibrary = document.getElementById("sidebarLibrary");
-const library = document.getElementById("library");
+// Event listeners de sidebar removidos - agora gerenciados por js/main.js (módulo)
+// Não adicionar listeners aqui para evitar conflitos com o sistema de navegação modular
 
-
-const mainWraper = document.getElementById("mainWraper");
-
-
-toggleSearchBtn.addEventListener('click', () => {
-    searchBar.classList.toggle('active');
-    sidebarSearch.classList.toggle('active');
-    sidebarLibrary.classList.remove('active');
-    sidebarMenuSelected.classList.add('active');
-});
-
-sidebarMenuSelected.addEventListener('click', () => {
-    searchBar.classList.remove('active');
-    sidebarSearch.classList.remove('active');
-    sidebarLibrary.classList.remove('active');
-    sidebarMenuSelected.classList.remove('active');
-
-    library.style.display = 'none';
-    mainWraper.style.display = 'block';
-});
-
-sidebarLibrary.addEventListener('click', () => {
-    sidebarMenuSelected.classList.add('active');
-    searchBar.classList.remove('active');
-    sidebarSearch.classList.remove('active');
-    sidebarLibrary.classList.add('active');
-
-    library.style.display = 'block';
-    mainWraper.style.display = 'none';
-});
 
 /*  LIBRARY (DEPRECATED - usar js/data.js em vez disso)    */
 
