@@ -328,9 +328,9 @@ main-wraper{
 	padding-left: 50px;
 	padding-right: 50px;
 	width: calc(100% - 250px);
-	min-height: calc(100vh - 100px);
+	height: calc(100vh - 100px);
 	overflow-y: scroll;
-	position: absolute;
+	position: fixed;
 	left: 250px;
 	top: 0;
 	background-color: rgb(30, 30, 30);
