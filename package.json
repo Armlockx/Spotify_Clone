@@ -1,0 +1,12 @@
+{
+  "name": "spotify_clone",
+  "version": "0.1.0",
+  "description": "Clone de player de música para estudo",
+  "scripts": {
+    "lint": "eslint . --ext .js",
+    "start": "" 
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}

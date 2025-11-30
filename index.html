@@ -11,9 +11,9 @@
     <link rel="icon" type="image/x-icon" href="img/spotify.png">
 </head>
 <body>
-    <div id="search__bar" class="search__bar">
-        <input type="text" name="search__bar" placeholder='Qual música deseja buscar?'>
-        <i class="fas fa-search search-icon"></i>
+    <div id="search__bar" class="search__bar" role="search">
+        <input id="search_input" type="text" name="search__bar" placeholder='Qual música deseja buscar?' aria-label="Pesquisar músicas">
+        <i class="fas fa-search search-icon" aria-hidden="true"></i>
     </div>
 
 	<div class="sidebar">
@@ -40,8 +40,10 @@
 					</div>
 
 					<div class="sidebar__menu__item">
-						<img src="https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84587ecba4a27774b2f6f07174">
-						<span>Músicas Curtidas</span>
+                        <div class="sidebar__menu__item__component">
+						    <img src="https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84587ecba4a27774b2f6f07174">
+						</div>
+                        <span>Músicas Curtidas</span>
 					</div>
 				</div>
 
@@ -62,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="sidebar__playlists">
+            <!-- <div class="sidebar__playlists">
                 <div class="sidebar__playlists__item">
                     <img src="img/matue.jpg">
                     <a href="">Matuê Playlist</a>         
@@ -94,18 +96,18 @@
                     <img src="img/top50global.jpg">
                     <a href="">Top 50 do Mundo</a>         
                 </div>
-            </div>
+            </div> -->
 		</div>
 	</div>
 
     <div class="main">
         <div class="main-wraper" id="mainWraper">
             <div class="main__row">
-                <div class="main__row__title"><h2>Minhas músicas (funcionando)</h2></div>
+                <div class="main__row__title"><h2>Minhas músicas</h2></div>
             </div>
 
-            <div class="main__row">
-                <div class="main__row__title"><h2>Paradas (para teste)</h2></div>
+            <!-- <div class="main__row">
+                <div class="main__row__title"><h2>Teste</h2></div>
 
                 <div class="main__col">
                     <img src="img/top50br.jpg">
@@ -161,7 +163,7 @@
                     <p>Escolhidas à dedo pra você!</p>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="library" id="library">
             <h2>Minha Biblioteca</h2>
@@ -180,27 +182,28 @@
         </div>
         <div class="player__control">
             <div class="player__control__buttons">
-                <a href=""><i class="fas fa-backward"></i></a>
-                <a style="display: none;" id="pauseBtn" href="#"><i class="far fa-pause-circle"></i></a>
-                <a id="playBtn" href="#"><i class="far fa-play-circle"></i></a>
-                <a href=""><i class="fas fa-forward"></i></a>
+                <a href="#" aria-label="Anterior" role="button"><i class="fas fa-backward" aria-hidden="true"></i></a>
+                <a style="display: none;" id="pauseBtn" href="#" aria-label="Pausar" role="button"><i class="far fa-pause-circle" aria-hidden="true"></i></a>
+                <a id="playBtn" href="#" aria-label="Tocar" role="button"><i class="far fa-play-circle" aria-hidden="true"></i></a>
+                <a href="#" aria-label="Próxima" role="button"><i class="fas fa-forward" aria-hidden="true"></i></a>
             </div>
 
-            <div class="player__control__progress">
+            <div class="player__control__progress" role="progressbar" aria-label="Progresso da faixa" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" tabindex="0">
                 <div class="player__time__current"><span id="current__time">0:00</span></div>
-                <div id="progress__bar" class="player__control__progress2"></div>
+                <div id="progress__bar" class="player__control__progress2" aria-hidden="true"></div>
                 <div class="player__time__total"><span id="total__time">--:--</span></div>
             </div>
         </div>
-        <div class="volume-container">
-                <input type="range" class="volumeControl" id="volumeControl" min="0" max="1" step="0.01" value="1">
-        </div>
+    <div class="volume-container">
+        <input type="range" class="volumeControl" id="volumeControl" min="0" max="1" step="0.01" value="1" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1">
+    </div>
     </div>
 
     <audio id="audioplayer" style="position: absolute; left: 0; top: 0; z-index: -999; opacity: 0;" controls="">
     </audio>
 
 
+    <script type="module" src="js/main.js"></script>
     <script src="js/scripts.js"></script>
 	<script src="js/all.min.js"></script>
 </body>

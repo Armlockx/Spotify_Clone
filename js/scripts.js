@@ -11,9 +11,10 @@ const totalTimeDisplay = document.getElementById('total__time');
 // Atualiza a barra de progresso e o tempo atual
 audioPlayer.addEventListener('timeupdate', () => {
     const currentTime = audioPlayer.currentTime;
-    const duration = audioPlayer.duration;
+    const duration = audioPlayer.duration || 0;
 
-    const progressPercent = (currentTime / duration) * 100;
+    // Proteção contra duration NaN/Infinity/0
+    const progressPercent = duration > 0 && isFinite(duration) ? (currentTime / duration) * 100 : 0;
     progressBar.style.width = `${progressPercent}%`;
 
     currentTimeDisplay.textContent = formatTime(currentTime);
@@ -28,7 +29,8 @@ function formatTime(time) {
 
 // Atualiza o tempo total quando o áudio é carregado
 audioPlayer.addEventListener('loadedmetadata', () => {
-    totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+    const duration = audioPlayer.duration || 0;
+    totalTimeDisplay.textContent = formatTime(isFinite(duration) ? duration : 0);
 });
 
 // Permite clicar na barra de progresso para buscar um ponto específico
@@ -117,33 +119,38 @@ audioPlayer.addEventListener('ended', () => {
 
 // Slide de volume
 const volumeControl = document.getElementById('volumeControl');
-volumeControl.addEventListener('input', () => {
-    audioPlayer.volume = volumeControl.value;
-});
+if (volumeControl) {
+        volumeControl.addEventListener('input', () => {
+                // value is string, audio.volume expects number between 0 and 1
+                audioPlayer.volume = Number(volumeControl.value);
+        });
 
-const input = document.querySelector("input");
+        // visual progress for the range input
+        function setBackgroundSize(rangeInput) {
+            rangeInput.style.setProperty("--background-size", `${getBackgroundSize(rangeInput)}%`);
+        }
 
-function setBackgroundSize(input) {
-  input.style.setProperty("--background-size", `${getBackgroundSize(input)}%`);
-}
+        // Aplica fundo ao slide de volume
+        setBackgroundSize(volumeControl);
 
-// Aplica fundo ao slide de volume
-setBackgroundSize(input);
+        volumeControl.addEventListener("input", () => setBackgroundSize(volumeControl));
 
-input.addEventListener("input", () => setBackgroundSize(input));
+        function getBackgroundSize(input) {
+            const min = +input.min || 0;
+            const max = +input.max || 100;
+            const value = +input.value;
 
-function getBackgroundSize(input) {
-  const min = +input.min || 0;
-  const max = +input.max || 100;
-  const value = +input.value;
+            const size = (value - min) / (max - min) * 100;
 
-  const size = (value - min) / (max - min) * 100;
-
-  return size;
+            return size;
+        }
 }
 
 function isLightColor(rgb) {
-    const [r, g, b] = rgb.match(/\d+/g).map(Number);
+    if (!rgb || typeof rgb !== 'string') return false;
+    const matches = rgb.match(/\d+/g);
+    if (!matches || matches.length < 3) return false;
+    const [r, g, b] = matches.map(Number);
 
     const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
@@ -178,30 +185,47 @@ function applyGradientToPlayer(colors) {
 
 // Quando a imagem da música é carregada, extrai as cores e aplica o gradiente
 const imgElement = document.querySelector('.player__artist img');
-if (imgElement.complete) {
-    const colors = extractDominantColors(imgElement);
-    applyGradientToPlayer(colors);
-} else {
-    imgElement.addEventListener('load', () => {
-        const colors = extractDominantColors(imgElement);
-        applyGradientToPlayer(colors);
-    });
+if (imgElement) {
+    if (imgElement.complete && imgElement.naturalWidth !== 0) {
+        try {
+            const colors = extractDominantColors(imgElement);
+            applyGradientToPlayer(colors);
+        } catch (e) {
+            // ColorThief pode falhar em imagens cross-origin
+            console.warn('Não foi possível extrair paleta da imagem inicial:', e);
+        }
+    } else {
+        imgElement.addEventListener('load', () => {
+            try {
+                const colors = extractDominantColors(imgElement);
+                applyGradientToPlayer(colors);
+            } catch (e) {
+                console.warn('Não foi possível extrair paleta da imagem ao carregar:', e);
+            }
+        });
+    }
 }
 
 // Atualiza o gradiente ao mudar de música
+// Atualiza o gradiente quando itens estáticos são clicados (se existirem)
 document.querySelectorAll('.main__col').forEach(item => {
     item.addEventListener('click', event => {
         const imgSrc = item.getAttribute('data-image');
-        const imgElement = document.querySelector('.player__artist img');
+        const imgEl = document.querySelector('.player__artist img');
+        if (!imgSrc || !imgEl) return;
 
         // Atualiza a imagem do artista
-        imgElement.src = imgSrc;
+        imgEl.src = imgSrc;
 
         // Quando a nova imagem é carregada, extrai as cores e aplica o gradiente
-        imgElement.addEventListener('load', () => {
-            const colors = extractDominantColors(imgElement);
-            applyGradientToPlayer(colors);
-        });
+        imgEl.addEventListener('load', () => {
+            try {
+                const colors = extractDominantColors(imgEl);
+                applyGradientToPlayer(colors);
+            } catch (e) {
+                console.warn('Erro ao extrair paleta:', e);
+            }
+        }, { once: true });
     });
 });
 
@@ -290,7 +314,10 @@ function playSongNew(song) {
 }
 
 
-document.addEventListener('DOMContentLoaded', loadSongs);
+document.addEventListener('DOMContentLoaded', () => {
+    // Já está sendo carregado pelo js/main.js
+    // loadSongs já foi chamado pelo módulo
+});
 
 
 
@@ -379,36 +406,52 @@ function displayLibrarySongs(songs) {
 
     songs.forEach(song => {
         song = verifyFields(song);
+        // Cria elemento de audio apenas para obter metadata; trata erros
+        if (song.file && song.file !== '#') {
+            const audio = new Audio();
+            audio.src = song.file;
 
-        const audio = new Audio(song.file);
+            const appendRow = (durationSeconds) => {
+                const formatedDuration = formatSongDuration(durationSeconds || 0);
 
-        audio.addEventListener('loadedmetadata', () => {
-            const totalSeconds = audio.duration;
-            const formatedDuration = formatSongDuration(totalSeconds);
-
-            console.log(formatedDuration);
-        
-            const divSong = document.createElement('div');
-            divSong.classList.add("songRow");
+                const divSong = document.createElement('div');
+                divSong.classList.add("songRow");
                 divSong.innerHTML = `
-                <img src="${song.cover}" alt="${song.name}">
-                <h3>${song.name}<br/></h3><p>${song.artist}</p>
+                    <img src="${song.cover}" alt="${song.name}">
+                    <h3>${song.name}<br/></h3><p>${song.artist}</p>
                     <p>${formatedDuration}</p>
-            `;
-        
-            if (song.file !== '#') {
+                `;
+
                 divSong.addEventListener('click', () => {
                     document.querySelectorAll('.songRow').forEach(i => i.classList.remove('active'));
                     divSong.classList.add('active');
                     playSongNew(song);
                 });
-            } else {
-                divSong.style.opacity = '0.6';
-                divSong.title = 'Arquivo de áudio não disponível';
-            }
 
+                library.appendChild(divSong);
+            };
+
+            audio.addEventListener('loadedmetadata', () => {
+                appendRow(audio.duration);
+            }, { once: true });
+
+            audio.addEventListener('error', () => {
+                console.warn('Erro ao carregar metadata do áudio:', song.file);
+                appendRow(0);
+            }, { once: true });
+        } else {
+            // Arquivo não disponível: adiciona linha sem duração e com estilo 'title' para tooltip
+            const divSong = document.createElement('div');
+            divSong.classList.add("songRow");
+            divSong.title = 'Arquivo de áudio não disponível';
+            divSong.innerHTML = `
+                <img src="${song.cover}" alt="${song.name}">
+                <h3>${song.name}<br/></h3><p>${song.artist}</p>
+                <p>--:--</p>
+            `;
+            divSong.style.opacity = '0.6';
             library.appendChild(divSong);
-        });        
+        }
     });
 }
 
@@ -418,11 +461,42 @@ function formatSongDuration(seconds) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-audioPlayer.addEventListener('ended', () => {
-    const currentItem = document.querySelector('.songRow.active');
+// Avança para a próxima faixa (aplicável tanto para grid quanto para biblioteca)
+function playNextTrack() {
+    const currentItem = document.querySelector('.songRow.active') || document.querySelector('.main__col.active');
+    if (!currentItem) return;
     const nextItem = currentItem.nextElementSibling;
+    if (nextItem) nextItem.click();
+}
 
-    if (nextItem) {
-        nextItem.click();
-    }
-});
+// Volta para a faixa anterior
+function playPreviousTrack() {
+    const currentItem = document.querySelector('.songRow.active') || document.querySelector('.main__col.active');
+    if (!currentItem) return;
+    const previousItem = currentItem.previousElementSibling;
+    if (previousItem) previousItem.click();
+}
+
+// Garante apenas um listener para 'ended'
+audioPlayer.removeEventListener('ended', playNextTrack);
+audioPlayer.addEventListener('ended', playNextTrack);
+
+// Botões de voltar e próxima
+const backwardBtn = document.querySelector('.player__control__buttons a:nth-child(1)');
+const forwardBtn = document.querySelector('.player__control__buttons a:nth-child(4)');
+
+if (backwardBtn) {
+    backwardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        playPreviousTrack();
+        return false;
+    });
+}
+
+if (forwardBtn) {
+    forwardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        playNextTrack();
+        return false;
+    });
+}
