@@ -4,6 +4,7 @@ export async function loadSongs() {
     try {
         const response = await fetch('musicas.json');
         const songs = await response.json();
+        console.log('Músicas carregadas:', songs.length);
         displaySongs(songs);
         displayLibrarySongs(songs);
     } catch (error) {
@@ -22,6 +23,9 @@ export function verifyFields(song) {
 export function displaySongs(songs) {
     const container = document.querySelector('.main__row');
     if (!container) return;
+
+    // Limpar músicas antigas
+    container.querySelectorAll('.main__col').forEach(el => el.remove());
 
     songs.forEach(song => {
         song = verifyFields(song);
@@ -49,8 +53,17 @@ export function displaySongs(songs) {
 }
 
 export function displayLibrarySongs(songs) {
-    const library = document.querySelector('.library');
-    if (!library) return;
+    const library = document.getElementById('library');
+    if (!library) {
+        console.error('Elemento #library não encontrado');
+        return;
+    }
+
+    console.log('Renderizando biblioteca com', songs.length, 'músicas');
+
+    // Limpar músicas antigas (mantendo header)
+    const oldSongs = library.querySelectorAll('.songRow');
+    oldSongs.forEach(song => song.remove());
 
     songs.forEach(song => {
         song = verifyFields(song);
@@ -63,7 +76,8 @@ export function displayLibrarySongs(songs) {
 
         divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
-            <h3>${song.name}<br/></h3><p>${song.artist}</p>
+            <h3>${song.name}</h3>
+            <p>${song.artist}</p>
             <p>${minutes}:${seconds}</p>
         `;
 

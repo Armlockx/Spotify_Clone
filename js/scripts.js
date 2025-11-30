@@ -232,64 +232,42 @@ document.querySelectorAll('.main__col').forEach(item => {
 
 
 // --- Carregar músicas do JSON ----
-// Carrega músicas
-async function loadSongs() {
-    try {
-        const response = await fetch('musicas.json');
-        const songs = await response.json();
-        displaySongs(songs);
-        //displayNewLibrary(songs);
-        displayLibrarySongs(songs);
-    } catch(error) {
-        console.error('Erro ao carregar: ', error);
-    }
-}
+// NOTA: loadSongs é chamado por js/main.js (módulo)
+// Esta função está aqui apenas para referência
+// async function loadSongs() {
+//     try {
+//         const response = await fetch('musicas.json');
+//         const songs = await response.json();
+//         displaySongs(songs);
+//         displayLibrarySongs(songs);
+//     } catch(error) {
+//         console.error('Erro ao carregar: ', error);
+//     }
+// }
 
 // Verifica campos inválidos e substitui por valores padrão
-function verifyFields(song) {
-    if (!song.name || song.name.trim() === '') {
-        song.name = 'Nome não disponível';
-    }
-    if (!song.artist || song.artist.trim() === '') {
-        song.artist = 'Artista desconhecido';
-    }
-    if (!song.cover || song.cover.trim() === '') {
-        song.cover = 'img/notFound.png';
-    }
-    if (!song.file || song.file.trim() === '') {
-        song.file = '#';
-    }
-    return song;
-}
+// NOTA: Esta função está também em js/data.js (módulo)
+// function verifyFields(song) {
+//     if (!song.name || song.name.trim() === '') {
+//         song.name = 'Nome não disponível';
+//     }
+//     if (!song.artist || song.artist.trim() === '') {
+//         song.artist = 'Artista desconhecido';
+//     }
+//     if (!song.cover || song.cover.trim() === '') {
+//         song.cover = 'img/notFound.png';
+//     }
+//     if (!song.file || song.file.trim() === '') {
+//         song.file = '#';
+//     }
+//     return song;
+// }
 
-// Mostra resultados
-function displaySongs(songs) {
-    const container = document.querySelector('.main__row');
-
-    songs.forEach(song => {
-        song = verifyFields(song);
-
-        const divSong = document.createElement('div');
-        divSong.classList.add("main__col");
-            divSong.innerHTML = `
-            <img src="${song.cover}" alt="${song.name}">
-            <h3>${song.name}<br/></h3><p>${song.artist}</p>
-        `;
-        
-        if (song.file !== '#') {
-            divSong.addEventListener('click', () => {
-                document.querySelectorAll('.main__col').forEach(i => i.classList.remove('active'));
-                divSong.classList.add('active');
-                playSongNew(song);
-            });
-        } else {
-            divSong.style.opacity = '0.6';
-            divSong.title = 'Arquivo de áudio não disponível';
-        }
-
-        container.appendChild(divSong);
-    });
-}
+// Mostra resultados (DEPRECATED - usar js/data.js em vez disso)
+// function displaySongs(songs) {
+//     const container = document.querySelector('.main__row');
+//     // ... removed for brevity
+// }
 
 function playSongNew(song) {
     const audioPlayer = document.getElementById('audioplayer');
@@ -359,48 +337,9 @@ sidebarLibrary.addEventListener('click', () => {
     mainWraper.style.display = 'none';
 });
 
-/*  LIBRARY     */
+/*  LIBRARY (DEPRECATED - usar js/data.js em vez disso)    */
 
 /*
-async function displayNewLibrary(songs) {
-    const library = document.querySelector('.library');
-
-    songs.forEach(song => {
-        song = verifyFields(song);
-
-        try {
-            const audio = new Audio(song);
-
-            await new Promise((resolve, reject) => {
-                audio.addEventListener('loadedmetadata', () => {
-                    resolve();
-                });
-                audio.addEventListener('error', (error) => {
-                    reject(error);
-                });
-            });
-
-            const totalSeconds = audio.duration;
-            const formatedDuration = formatSongDuration(totalSeconds);
-
-            const divSong = document.createElement('div');
-            divSong.classList.add('songRow');
-            divSong.innerHTML = `
-            <img src="${song.cover}" alt="${song.name}">
-            <h3>${song.name}<br/></h3><p>${song.artist}</p>
-                <p>${formatedDuration}</p>
-        `;
-
-        library.appendChild(divSong);
-
-        } catch (error) {
-            console.error(`Erro ao carregar ${song}:`, error);
-
-        }
-    });
-}
-*/
-
 function displayLibrarySongs(songs) {
     const library = document.querySelector('.library');
 
@@ -454,6 +393,7 @@ function displayLibrarySongs(songs) {
         }
     });
 }
+*/
 
 function formatSongDuration(seconds) {
     const minutes = Math.floor(seconds / 60);

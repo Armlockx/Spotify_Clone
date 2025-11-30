@@ -16,57 +16,109 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carrega músicas
     loadSongs();
 
-    // Sidebar / search toggles (compatibilidade com comportamento original)
-    const toggleSearchBtn = document.getElementById('toggleSearchBarBtn');
-    const searchBar = document.getElementById('search__bar');
-    const sidebarSearch = document.getElementById('toggleSearchBarBtn');
-    const sidebarMenuSelected = document.getElementById('sidebarMenuSelected');
-    const sidebarLibrary = document.getElementById('sidebarLibrary');
-    const library = document.getElementById('library');
-    const mainWraper = document.getElementById('mainWraper');
-
-    if (toggleSearchBtn && searchBar) {
-        toggleSearchBtn.addEventListener('click', () => {
-            searchBar.classList.toggle('active');
-            sidebarSearch.classList.toggle('active');
-            sidebarLibrary.classList.remove('active');
-            sidebarMenuSelected.classList.add('active');
-        });
-    }
-
-    if (sidebarMenuSelected) {
-        sidebarMenuSelected.addEventListener('click', () => {
-            searchBar.classList.remove('active');
-            sidebarSearch.classList.remove('active');
-            sidebarLibrary.classList.remove('active');
-            sidebarMenuSelected.classList.remove('active');
-
-            if (library) library.style.display = 'none';
-            if (mainWraper) mainWraper.style.display = 'block';
-        });
-    }
-
-    if (sidebarLibrary) {
-        sidebarLibrary.addEventListener('click', () => {
-            sidebarMenuSelected.classList.add('active');
-            searchBar.classList.remove('active');
-            sidebarSearch.classList.remove('active');
-            sidebarLibrary.classList.add('active');
-
-            if (library) library.style.display = 'block';
-            if (mainWraper) mainWraper.style.display = 'none';
-        });
-    }
+    // ===== NOVO SISTEMA DE NAVEGAÇÃO DO SIDEBAR =====
+    initializeSidebarNavigation();
 
     // Update volume and aria value when changed
     const vol = document.getElementById('volumeControl');
     const audioPlayer = document.getElementById('audioplayer');
     if (vol && audioPlayer) {
         vol.addEventListener('input', () => {
-            // Aplicar volume ao áudio
             audioPlayer.volume = Number(vol.value);
-            // Atualizar aria para acessibilidade
             vol.setAttribute('aria-valuenow', vol.value);
         });
     }
 });
+
+/**
+ * Sistema de navegação do sidebar
+ * Gerencia: Início, Buscar, Biblioteca
+ */
+function initializeSidebarNavigation() {
+    // Elementos do DOM
+    const sidebarMenuSelected = document.getElementById('sidebarMenuSelected');
+    const toggleSearchBarBtn = document.getElementById('toggleSearchBarBtn');
+    const sidebarLibrary = document.getElementById('sidebarLibrary');
+    const searchBar = document.getElementById('search__bar');
+    const mainWraper = document.getElementById('mainWraper');
+    const library = document.getElementById('library');
+
+    // Validação
+    if (!sidebarMenuSelected || !toggleSearchBarBtn || !sidebarLibrary) {
+        console.error('Elementos do menu não encontrados');
+        return;
+    }
+
+    /**
+     * Estado global do navegador
+     */
+    const menuState = {
+        currentPage: 'inicio', // 'inicio', 'buscar', 'biblioteca'
+    };
+
+    /**
+     * Função para limpar todos os estados
+     */
+    function clearAllStates() {
+        sidebarMenuSelected.classList.remove('active');
+        toggleSearchBarBtn.classList.remove('active');
+        sidebarLibrary.classList.remove('active');
+        searchBar.classList.remove('active');
+        library.classList.remove('active');
+        if (mainWraper) mainWraper.style.display = 'none';
+    }
+
+    /**
+     * Função para navegar para uma página
+     */
+    function navigateTo(page) {
+        if (menuState.currentPage === page) return; // Evita redundância
+
+        clearAllStates();
+        menuState.currentPage = page;
+
+        switch (page) {
+            case 'inicio':
+                sidebarMenuSelected.classList.add('active');
+                if (mainWraper) mainWraper.style.display = 'block';
+                break;
+
+            case 'buscar':
+                toggleSearchBarBtn.classList.add('active');
+                searchBar.classList.add('active');
+                if (mainWraper) mainWraper.style.display = 'block';
+                break;
+
+            case 'biblioteca':
+                sidebarLibrary.classList.add('active');
+                library.classList.add('active');
+                break;
+        }
+
+        console.log('Navegando para:', page);
+    }
+
+    // Event Listeners
+    sidebarMenuSelected.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo('inicio');
+    });
+
+    toggleSearchBarBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Se já está em buscar, apenas toggle a barra
+        if (menuState.currentPage === 'buscar') {
+            searchBar.classList.toggle('active');
+        } else {
+            navigateTo('buscar');
+        }
+    });
+
+    sidebarLibrary.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo('biblioteca');
+    });
+
+    // Inicializa na página "Início"
+    navigateTo('inicio');
+}

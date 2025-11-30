@@ -83,6 +83,17 @@ html, body{height: 100%;}
 	background-color: rgb(80, 80, 80);
 }
 
+.sidebar__search:hover,
+.sidebar__library:hover {
+	background-color: rgb(50, 50, 50);
+}
+
+.sidebar__search.active,
+.sidebar__library.active {
+	background-color: rgb(80, 80, 80);
+	color: white;
+}
+
 .sidebar__menu p.sidebar__menu__title{
 	color: white;
 	text-transform: uppercase;
@@ -259,7 +270,18 @@ html, body{height: 100%;}
 /*	LIBRARY	*/
 .library {
 	padding-bottom: 200px;
+	padding-top: 20px;
+	padding-left: 50px;
+	padding-right: 50px;
 	display: none;
+	width: 100%;
+	min-height: 100vh;
+	overflow-y: auto;
+	position: relative;
+}
+
+.library.active {
+	display: block;
 }
 
 .library h2 {
@@ -269,31 +291,37 @@ html, body{height: 100%;}
 }
 
 .libraryHeader {
-    display: flex;
-    /* align-items: center; */
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    border-bottom: 1px solid rgb(60, 60, 60);
+    padding-bottom: 10px;
 }
 
 .libraryHeader span {
-	color: white;
-	    padding-left: 10px;
-    padding-right: 10px;
-
+	color: rgb(150, 150, 150);
+	font-weight: bold;
+	font-size: 14px;
+	text-transform: uppercase;
 }
 
 .songRow{
     cursor: pointer;
     width: 100%;
     background-color: #282828;
-    margin-right: 1%;
+    margin-right: 0;
     margin-top: 10px;
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-    transition: 0.3s;
-    display: flex;
+    transition: transform 0.2s, background-color 0.2s;
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr 1fr;
     align-items: center;
+    gap: 15px;
 }
 
 .songRow.active{
@@ -307,18 +335,27 @@ html, body{height: 100%;}
 
 .songRow img{
     width: 60px;
-    border-radius: 3px;
     height: 60px;
+    border-radius: 3px;
+    object-fit: cover;
 }
 
 .songRow h3{
 	color: white;
-    margin: 8px 10px;
+    margin: 0;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .songRow p{
-	color: rgb(100, 100, 100);
-    margin: 8px 10px;
+	color: rgb(150, 150, 150);
+    margin: 0;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .songRow[title] {
