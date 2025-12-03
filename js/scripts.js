@@ -4,6 +4,9 @@ var loaded = false;
 var playBtn = document.getElementById('playBtn');
 var pauseBtn = document.getElementById('pauseBtn');
 
+// Rastreia a música atualmente tocando
+var currentSong = null;
+
 const progressBar = document.getElementById('progress__bar');
 const currentTimeDisplay = document.getElementById('current__time');
 const totalTimeDisplay = document.getElementById('total__time');
@@ -276,6 +279,10 @@ function playSongNew(song) {
     audioPlayer.src = song.file;
     audioPlayer.play();
 
+    // Armazena a música atual
+    currentSong = song;
+    updateSpotifyLink(song);
+
     playerArtist.innerHTML = `
             <img src="${song.cover}" alt="${song.name}">
             <h3 class="song__title">${song.name}<br /><span>${song.artist}</span></h3>
@@ -289,6 +296,30 @@ function playSongNew(song) {
 
     playBtn.style.display = "none";
     pauseBtn.style.display = "inline";
+}
+
+// Atualiza o link do Spotify com a música atual
+function updateSpotifyLink(song) {
+    const spotifyLink = document.getElementById('spotifyLink');
+    if (!spotifyLink) return;
+
+    // Se a música tem um spotifyId, usa o link direto para a faixa no formato intl-pt
+    if (song.spotifyId) {
+        // Formato: https://open.spotify.com/intl-pt/track/{spotifyId}
+        // Se houver parâmetro si, adiciona: ?si={si}
+        let url = `https://open.spotify.com/intl-pt/track/${song.spotifyId}`;
+        if (song.spotifySi) {
+            url += `?si=${song.spotifySi}`;
+        }
+        spotifyLink.href = url;
+        spotifyLink.title = `Abrir "${song.name}" no Spotify`;
+    } else {
+        // Fallback: busca por nome e artista
+        const songName = encodeURIComponent(song.name);
+        const artistName = encodeURIComponent(song.artist);
+        spotifyLink.href = `https://open.spotify.com/intl-pt/search/${songName}%20${artistName}`;
+        spotifyLink.title = `Buscar "${song.name}" no Spotify`;
+    }
 }
 
 

@@ -12,8 +12,8 @@
 </head>
 <body>
     <div id="search__bar" class="search__bar" role="search">
-        <input id="search_input" type="text" name="search__bar" placeholder='Qual música deseja buscar?' aria-label="Pesquisar músicas">
         <i class="fas fa-search search-icon" aria-hidden="true"></i>
+        <input id="search_input" type="text" name="search__bar" placeholder='O que você quer ouvir?' aria-label="Pesquisar músicas">
     </div>
 
 	<div class="sidebar">
@@ -27,6 +27,8 @@
 				<a href="#" class="sidebar__menu__selected active" id="sidebarMenuSelected"><i class="fas fa-home"></i> Início</a>
 				<a href="#" class="sidebar__search" id="toggleSearchBarBtn"><i class="fas fa-search searchBtn"></i> Buscar</a>
 				<a href="#" class="sidebar__library" id="sidebarLibrary"><i class="fas fa-database"></i> Biblioteca</a>
+				<a href="#" class="sidebar__favorites" id="sidebarFavorites"><i class="fas fa-heart"></i> Favoritos</a>
+				<a href="#" class="sidebar__history" id="sidebarHistory"><i class="fas fa-history"></i> Histórico</a>
 			</div>				<div class="sidebar__menu">
 					<p class="sidebar__menu__title">Playlists</p>
 
@@ -173,12 +175,32 @@
                 <span style="flex: 0 0 80px;">Duração</span>
             </div>
         </div>
+
+        <div class="library" id="favoritesLibrary">
+            <h2>Músicas Favoritas</h2>
+            <div class="libraryHeader">
+                <span style="flex: 0 0 70px;"></span>
+                <span style="flex: 1;">Nome</span>
+                <span style="flex: 1;">Artista</span>
+                <span style="flex: 0 0 80px;">Duração</span>
+            </div>
+        </div>
+
+        <div class="library" id="historyLibrary">
+            <h2>Histórico de Reprodução</h2>
+            <div class="libraryHeader">
+                <span style="flex: 0 0 70px;"></span>
+                <span style="flex: 1;">Nome</span>
+                <span style="flex: 1;">Artista</span>
+                <span style="flex: 0 0 80px;">Tocada há</span>
+            </div>
+        </div>
     </div>
 
 
     <div class="player">
         <div class="player__artist">
-            <img src="img/deftones.jpg">
+            <!-- <img src="img/deftones.jpg"> -->
         </div>
         <div class="player__control">
             <div class="player__control__buttons">
@@ -187,16 +209,18 @@
                 <a id="playBtn" href="#" aria-label="Tocar" role="button"><i class="far fa-play-circle" aria-hidden="true"></i></a>
                 <a href="#" aria-label="Próxima" role="button"><i class="fas fa-forward" aria-hidden="true"></i></a>
             </div>
-
             <div class="player__control__progress" role="progressbar" aria-label="Progresso da faixa" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" tabindex="0">
                 <div class="player__time__current"><span id="current__time">0:00</span></div>
                 <div id="progress__bar" class="player__control__progress2" aria-hidden="true"></div>
                 <div class="player__time__total"><span id="total__time">--:--</span></div>
             </div>
         </div>
-    <div class="volume-container">
-        <input type="range" class="volumeControl" id="volumeControl" min="0" max="1" step="0.01" value="1" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1">
-    </div>
+        <div class="volume-container">
+            <input type="range" class="volumeControl" id="volumeControl" min="0" max="1" step="0.01" value="1" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1">
+            <a id="spotifyLink" href="#" target="_blank" aria-label="Abrir no Spotify" role="button" class="spotify-link-btn" title="Abrir no Spotify">
+                <i class="fab fa-spotify" aria-hidden="true"></i>
+            </a>
+        </div>
     </div>
 
     <audio id="audioplayer" style="position: absolute; left: 0; top: 0; z-index: -999; opacity: 0;" controls="">

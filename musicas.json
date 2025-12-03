@@ -4,83 +4,96 @@
         "artist": "The Last Shadow Puppets",
         "cover": "img/dance.jpg",
         "file": "assets/Sweet Dreams, TN.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "0MMyJUC3WNnFS1lit5pTjk"
     },
     {
         "name": "Change (In The House Of Flies)",
         "artist": "Deftones",
         "cover": "img/deftones.jpg",
         "file": "assets/Deftones - Change (In The House Of Flies).mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "1wj2ZNR8jzOHx1GVIYbA2F"
     },
     {
         "name": "Aviation",
         "artist": "The Last Shadow Puppets",
         "cover": "img/dance.jpg",
         "file": "assets/Aviation.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "2cop62KNgi55QqIozb5bMf",
+        "spotifySi": "cbf77d2070334532"
     },
     {
         "name": "Change You Mind",
         "artist": "The Killers",
         "cover": "img/461683.jpg",
         "file": "assets/Change Your Mind.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "4J6K4VbF6sR4r7XmvC3U5X"
     },
     {
         "name": "Color Blind",
         "artist": "Lil Xan",
         "cover": "img/15542.jpg",
         "file": "assets/Color Blind.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "0h8h8F7F5r8Bv0P0J9K1L"
     },
     {
         "name": "Emily",
         "artist": "Catfish and the Bottleman",
         "cover": "img/478456.jpg",
         "file": "assets/Emily.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "2ePcL8bC1yV4K6M8N0P2Q"
     },
     {
         "name": "jealousy, jealousy",
         "artist": "Olivia Rodrigo",
         "cover": "img/477221.jpg",
         "file": "assets/jealousy, jealousy.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "1pzNEHLfqCeqHCknIKsZcK"
     },
     {
         "name": "Lonely Boy",
         "artist": "The Black Keys",
         "cover": "img/35472.jpg",
         "file": "assets/Lonely Boy.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "6YOT5DYpK1b8EpHEfgImWA"
     },
     {
         "name": "Mr. Brightside",
         "artist": "The Killers",
         "cover": "img/461683.jpg",
         "file": "assets/Mr. Brightside.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "3n3Ppam7vgaVa1iaRUc9Lp"
     },
     {
         "name": "Step Up the Morphine",
         "artist": "DMA'S",
         "cover": "img/145256.jpg",
         "file": "assets/Step Up the Morphine.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "2N9g7eKR1rjSsR5Z1T2V3W"
     },
     {
         "name": "The Wooden Sky",
         "artist": "The Wooden Sky",
         "cover": "img/499308.jpg",
         "file": "assets/The Wooden Sky.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "4X5Y6Z7A8B9C0D1E2F3G4H"
     },
     {
         "name": "You Are The Right One",
         "artist": "Sports",
         "cover": "img/369693.jpg",
         "file": "assets/You Are the Right One.mp3",
-        "duration": 0
+        "duration": 0,
+        "spotifyId": "5I6J7K8L9M0N1O2P3Q4R5S"
     }
 ]

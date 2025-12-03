@@ -1,8 +1,22 @@
 import player from './player.js';
-import { loadSongs } from './data.js';
+import { loadSongs, getAllSongs, displaySongs, displayLibrarySongs } from './data.js';
 import { setRangeBackground } from './ui.js';
+import { Theme } from './theme.js';
+import { Keyboard } from './keyboard.js';
+import { Favorites } from './favorites.js';
+import { History } from './history.js';
+import { Filters } from './filters.js';
+import { Upload } from './upload.js';
+import { Waveform } from './waveform.js';
+import { Storage } from './storage.js';
+import { Playlists } from './playlists.js';
+import { playSongNew } from './player.js';
+import { Delete } from './delete.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializa tema primeiro
+    Theme.init();
+
     // Inicializa player (event listeners, etc.)
     player.initPlayer();
 
@@ -10,8 +24,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeControl = document.getElementById('volumeControl');
     if (volumeControl) {
         setRangeBackground(volumeControl);
-        volumeControl.addEventListener('input', () => setRangeBackground(volumeControl));
+        volumeControl.addEventListener('input', () => {
+            setRangeBackground(volumeControl);
+            const audioPlayer = document.getElementById('audioplayer');
+            if (audioPlayer) {
+                const vol = Number(volumeControl.value);
+                audioPlayer.volume = vol;
+                volumeControl.setAttribute('aria-valuenow', vol);
+                Storage.updatePreference('volume', vol);
+            }
+        });
     }
+
+    // Inicializa sistemas
+    Keyboard.init();
+    Filters.init();
+    Upload.init();
+    Waveform.init();
+    Playlists.init();
+    Favorites.init();
+    History.init();
+    Delete.init();
 
     // Carrega músicas
     loadSongs();
@@ -19,14 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== NOVO SISTEMA DE NAVEGAÇÃO DO SIDEBAR =====
     initializeSidebarNavigation();
 
-    // Update volume and aria value when changed
-    const vol = document.getElementById('volumeControl');
-    const audioPlayer = document.getElementById('audioplayer');
-    if (vol && audioPlayer) {
-        vol.addEventListener('input', () => {
-            audioPlayer.volume = Number(vol.value);
-            vol.setAttribute('aria-valuenow', vol.value);
-        });
+    // Restaura última música se disponível
+    const lastSong = Storage.getCurrentSong();
+    if (lastSong && lastSong.file) {
+        // Opcional: auto-play da última música (comentado para não ser intrusivo)
+        // player.playSongNew(lastSong);
     }
 });
 
@@ -58,6 +88,9 @@ function initializeSidebarNavigation() {
         currentPage: 'inicio', // 'inicio', 'buscar', 'biblioteca'
     };
 
+    const favoritesLibrary = document.getElementById('favoritesLibrary');
+    const historyLibrary = document.getElementById('historyLibrary');
+
     /**
      * Função para limpar todos os estados
      */
@@ -65,8 +98,12 @@ function initializeSidebarNavigation() {
         sidebarMenuSelected.classList.remove('active');
         toggleSearchBarBtn.classList.remove('active');
         sidebarLibrary.classList.remove('active');
+        if (sidebarFavorites) sidebarFavorites.classList.remove('active');
+        if (sidebarHistory) sidebarHistory.classList.remove('active');
         searchBar.classList.remove('active');
         library.classList.remove('active');
+        if (favoritesLibrary) favoritesLibrary.classList.remove('active');
+        if (historyLibrary) historyLibrary.classList.remove('active');
         if (mainWraper) mainWraper.classList.add('hidden');
     }
 
@@ -96,6 +133,22 @@ function initializeSidebarNavigation() {
             case 'biblioteca':
                 sidebarLibrary.classList.add('active');
                 library.classList.add('active');
+                break;
+
+            case 'favoritos':
+                if (sidebarFavorites) sidebarFavorites.classList.add('active');
+                if (favoritesLibrary) {
+                    favoritesLibrary.classList.add('active');
+                    displayFavorites();
+                }
+                break;
+
+            case 'historico':
+                if (sidebarHistory) sidebarHistory.classList.add('active');
+                if (historyLibrary) {
+                    historyLibrary.classList.add('active');
+                    displayHistory();
+                }
                 break;
         }
 
@@ -127,10 +180,26 @@ function initializeSidebarNavigation() {
 
     sidebarLibrary.addEventListener('click', (e) => {
         e.preventDefault();
-        // Se já está em biblioteca, apenas manter (ou pode fazer toggle se preferir)
-        // Por agora, apenas navega normalmente (a verificação de redundância evita reset)
         navigateTo('biblioteca');
     });
+
+    // Favoritos
+    const sidebarFavorites = document.getElementById('sidebarFavorites');
+    if (sidebarFavorites) {
+        sidebarFavorites.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('favoritos');
+        });
+    }
+
+    // Histórico
+    const sidebarHistory = document.getElementById('sidebarHistory');
+    if (sidebarHistory) {
+        sidebarHistory.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('historico');
+        });
+    }
 
     // Keyboard navigation (Arrow Up/Down, Home, End)
     if (sidebarEl) {
@@ -163,4 +232,91 @@ function initializeSidebarNavigation() {
 
     // Inicializa na página "Início"
     navigateTo('inicio');
+
+    // Busca em tempo real
+    const searchInput = document.getElementById('search_input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(e.target.value);
+            }, 300);
+        });
+    }
+}
+
+// Funções auxiliares
+function displayFavorites() {
+    const allSongs = getAllSongs();
+    const favorites = Favorites.getFavoriteSongs(allSongs);
+    const container = document.getElementById('favoritesLibrary');
+    if (container) {
+        displaySongsInLibrary(container, favorites);
+    }
+}
+
+function displayHistory() {
+    const container = document.getElementById('historyLibrary');
+    if (container) {
+        History.displayHistorySongs(container, (song) => {
+            playSongNew(song);
+        });
+    }
+}
+
+function displaySongsInLibrary(container, songs) {
+    // Remove apenas as músicas, mantendo o header
+    const oldSongs = container.querySelectorAll('.songRow');
+    oldSongs.forEach(s => s.remove());
+    
+    // Remove mensagens anteriores
+    const oldMessages = container.querySelectorAll('p[style*="text-align: center"]');
+    oldMessages.forEach(m => m.remove());
+
+    if (songs.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.style.cssText = 'color: var(--text-secondary); padding: 20px; text-align: center;';
+        emptyMsg.textContent = 'Nenhuma música encontrada';
+        container.appendChild(emptyMsg);
+        return;
+    }
+
+    songs.forEach(song => {
+        const div = document.createElement('div');
+        div.className = 'songRow';
+        const duration = song.duration || 0;
+        const minutes = Math.floor(duration / 60);
+        const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
+        
+        div.innerHTML = `
+            <img src="${song.cover}" alt="${song.name}">
+            <h3>${song.name}</h3>
+            <p>${song.artist}</p>
+            <p>${minutes}:${seconds}</p>
+        `;
+
+        div.addEventListener('click', () => {
+            playSongNew(song);
+        });
+
+        container.appendChild(div);
+    });
+}
+
+function performSearch(query) {
+    if (!query || query.trim() === '') {
+        loadSongs();
+        return;
+    }
+
+    const allSongs = getAllSongs();
+    const filtered = allSongs.filter(song => {
+        const searchTerm = query.toLowerCase();
+        return song.name.toLowerCase().includes(searchTerm) ||
+               song.artist.toLowerCase().includes(searchTerm);
+    });
+
+    displaySongs(filtered);
+    displayLibrarySongs(filtered);
 }
