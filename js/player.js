@@ -180,7 +180,8 @@ export function playSongNew(song) {
     audioPlayer.addEventListener('error', errorHandler, { once: true });
     
     // Carrega novo arquivo
-    audioPlayer.src = song.file;
+        audioPlayer.src = song.file;
+        audioPlayer.crossOrigin = 'anonymous';
     audioPlayer.load();
     
     // Tenta reproduzir
@@ -204,16 +205,25 @@ export function playSongNew(song) {
     }
 
     if (playerArtist) {
-        playerArtist.innerHTML = `\n            <img src="${song.cover}" alt="${song.name}" loading="lazy">\n            <h3 class="song__title">${song.name}<br /><span>${song.artist}</span></h3>\n        `;
+        playerArtist.innerHTML = `\n            <img src="${song.cover}" alt="${song.name}" loading="lazy" crossorigin="anonymous">\n            <h3 class="song__title">${song.name}<br /><span>${song.artist}</span></h3>\n        `;
 
         const imgPlayer = playerArtist.querySelector('img');
         if (imgPlayer) {
+            // Configura crossorigin para permitir extração de cores de imagens cross-origin
+            imgPlayer.crossOrigin = 'anonymous';
+            
             imgPlayer.addEventListener('load', () => {
                 try {
-                    const colors = extractDominantColors(imgPlayer);
-                    applyGradientToPlayer(colors);
+                    // Verifica se a imagem está completa antes de extrair cores
+                    if (imgPlayer.complete && imgPlayer.naturalWidth > 0) {
+                        const colors = extractDominantColors(imgPlayer);
+                        applyGradientToPlayer(colors);
+                    }
                 } catch (e) {
-                    console.warn('Erro ao extrair paleta:', e);
+                    // Erro de CORS é esperado para algumas imagens, apenas loga se não for CORS
+                    if (!e.message || !e.message.includes('tainted') && !e.message.includes('cross-origin')) {
+                        console.warn('Erro ao extrair paleta:', e);
+                    }
                 }
             }, { once: true });
             

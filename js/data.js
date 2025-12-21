@@ -4,37 +4,41 @@ import { Favorites } from './favorites.js';
 import { Filters } from './filters.js';
 import { History } from './history.js';
 import { Delete } from './delete.js';
+import { supabase } from './supabaseClient.js';
 
 let allSongs = [];
+let filterListenerAttached = false;
 
 export async function loadSongs() {
     try {
-        const response = await fetch('musicas.json');
-        const jsonSongs = await response.json();
-        
-        // Carrega músicas enviadas
-        const uploadedSongs = Storage.getUploadedSongs();
-        
-        // Combina todas as músicas
-        allSongs = [...jsonSongs, ...uploadedSongs];
+        // Fetch songs from Supabase only
+        const { data: supabaseSongs, error } = await supabase
+            .from('songs')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Erro ao carregar músicas do Supabase:', error);
+            throw error;
+        }
+
+        // Usa apenas músicas do Supabase
+        allSongs = supabaseSongs || [];
         
         console.log('Músicas carregadas:', allSongs.length);
         
-        // Popula opções de filtros
         Filters.populateFilterOptions(allSongs);
-        
-        // Aplica filtros e ordenação
         const filteredSongs = Filters.getFilteredAndSortedSongs(allSongs);
-        
         displaySongs(filteredSongs);
         displayLibrarySongs(filteredSongs);
-        
-        // Listener para mudanças de filtros
-        document.addEventListener('filtersChanged', () => {
-            const filtered = Filters.getFilteredAndSortedSongs(allSongs);
-            displaySongs(filtered);
-            displayLibrarySongs(filtered);
-        });
+
+        // Atualiza botões de favorito após renderizar (busca todos de uma vez)
+        Favorites.updateFavoriteButtons();
+
+        if (!filterListenerAttached) {
+            document.addEventListener('filtersChanged', applyFilters);
+            filterListenerAttached = true;
+        }
     } catch (error) {
         console.error('Erro ao carregar músicas:', error);
         showError('Erro ao carregar músicas. Por favor, recarregue a página.');
@@ -70,6 +74,7 @@ export function displaySongs(songs) {
 
         const divSong = document.createElement('div');
         divSong.classList.add('main__col');
+        divSong.dataset.songId = song.id; // Adiciona ID para facilitar busca
         
         // Adiciona botão de favorito
         const favoriteBtn = Favorites.createFavoriteButton(song, divSong);
@@ -123,6 +128,7 @@ export function displayLibrarySongs(songs) {
 
         const divSong = document.createElement('div');
         divSong.classList.add('songRow');
+        divSong.dataset.songId = song.id; // Adiciona ID para facilitar busca
 
         // duration value (may be 0 if not known)
         const duration = song.duration || 0;
@@ -192,6 +198,12 @@ export function formatSongDuration(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function applyFilters() {
+    const filtered = Filters.getFilteredAndSortedSongs(allSongs);
+    displaySongs(filtered);
+    displayLibrarySongs(filtered);
 }
 
 function showError(message) {

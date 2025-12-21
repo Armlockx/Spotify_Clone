@@ -24,29 +24,27 @@ export const Theme = {
         // Verifica se já existe
         if (document.getElementById('themeToggle')) return;
 
-        const sidebar = document.querySelector('.sidebar__menu');
-        if (!sidebar) return;
-
-        const toggle = document.createElement('a');
+        const toggle = document.createElement('button');
         toggle.id = 'themeToggle';
-        toggle.href = '#';
-        toggle.className = 'sidebar__theme';
-        toggle.innerHTML = '<i class="fas fa-moon"></i> <span>Tema</span>';
+        toggle.className = 'theme-toggle';
         toggle.setAttribute('aria-label', 'Alternar tema');
         toggle.setAttribute('role', 'button');
+        toggle.setAttribute('type', 'button');
+
+        // Cria container para os ícones
+        toggle.innerHTML = `
+            <i class="fas fa-moon theme-icon"></i>
+            <i class="fas fa-sun theme-icon"></i>
+        `;
 
         toggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             this.toggleTheme();
         });
 
-        // Adiciona após o item de Biblioteca
-        const library = document.getElementById('sidebarLibrary');
-        if (library && library.parentNode) {
-            library.parentNode.insertBefore(toggle, library.nextSibling);
-        } else {
-            sidebar.appendChild(toggle);
-        }
+        // Adiciona ao body (canto superior direito)
+        document.body.appendChild(toggle);
 
         this.updateThemeToggle(document.documentElement.getAttribute('data-theme') || 'dark');
     },
@@ -55,9 +53,14 @@ export const Theme = {
         const toggle = document.getElementById('themeToggle');
         if (!toggle) return;
 
-        const icon = toggle.querySelector('i');
-        if (icon) {
-            icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        // Remove classes anteriores
+        toggle.classList.remove('dark', 'light');
+        
+        // Adiciona classe baseada no tema
+        if (theme === 'dark') {
+            toggle.classList.add('dark');
+        } else {
+            toggle.classList.add('light');
         }
     }
 };

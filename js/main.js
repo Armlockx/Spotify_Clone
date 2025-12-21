@@ -12,6 +12,7 @@ import { Storage } from './storage.js';
 import { Playlists } from './playlists.js';
 import { playSongNew } from './player.js';
 import { Delete } from './delete.js';
+import { Auth } from './auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializa tema primeiro
@@ -41,13 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     Filters.init();
     Upload.init();
     Waveform.init();
-    Playlists.init();
-    Favorites.init();
-    History.init();
-    Delete.init();
 
-    // Carrega músicas
-    loadSongs();
+    // Carrega músicas e inicializa módulos dependentes após autenticação
+    Auth.init().then(() => {
+        loadSongs();
+        Playlists.init();
+        Favorites.init();
+        History.init();
+        Delete.init();
+    });
 
     // ===== NOVO SISTEMA DE NAVEGAÇÃO DO SIDEBAR =====
     initializeSidebarNavigation();
@@ -67,14 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeSidebarNavigation() {
     // Elementos do DOM
     const sidebarMenuSelected = document.getElementById('sidebarMenuSelected');
-    const toggleSearchBarBtn = document.getElementById('toggleSearchBarBtn');
     const sidebarLibrary = document.getElementById('sidebarLibrary');
     const searchBar = document.getElementById('search__bar');
     const mainWraper = document.getElementById('mainWraper');
     const library = document.getElementById('library');
 
     // Validação
-    if (!sidebarMenuSelected || !toggleSearchBarBtn || !sidebarLibrary) {
+    if (!sidebarMenuSelected || !sidebarLibrary) {
         console.error('Elementos do menu não encontrados');
         return;
     }
@@ -96,11 +98,9 @@ function initializeSidebarNavigation() {
      */
     function clearAllStates() {
         sidebarMenuSelected.classList.remove('active');
-        toggleSearchBarBtn.classList.remove('active');
         sidebarLibrary.classList.remove('active');
         if (sidebarFavorites) sidebarFavorites.classList.remove('active');
         if (sidebarHistory) sidebarHistory.classList.remove('active');
-        searchBar.classList.remove('active');
         library.classList.remove('active');
         if (favoritesLibrary) favoritesLibrary.classList.remove('active');
         if (historyLibrary) historyLibrary.classList.remove('active');
@@ -125,9 +125,13 @@ function initializeSidebarNavigation() {
                 break;
 
             case 'buscar':
-                toggleSearchBarBtn.classList.add('active');
-                searchBar.classList.add('active');
+                // Barra de busca sempre visível no topo
                 if (mainWraper) mainWraper.classList.remove('hidden');
+                // Foca na busca
+                const searchInput = document.getElementById('search_input');
+                if (searchInput) {
+                    setTimeout(() => searchInput.focus(), 100);
+                }
                 break;
 
             case 'biblioteca':
@@ -160,6 +164,14 @@ function initializeSidebarNavigation() {
                 sidebarEl.classList.remove('suppress-hover');
             }
         }
+        
+        // Se for buscar, apenas foca na busca (já está sempre visível)
+        if (page === 'buscar') {
+            const searchInput = document.getElementById('search_input');
+            if (searchInput) {
+                setTimeout(() => searchInput.focus(), 100);
+            }
+        }
     }
 
     // Event Listeners
@@ -168,19 +180,18 @@ function initializeSidebarNavigation() {
         navigateTo('inicio');
     });
 
-    toggleSearchBarBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Se já está em buscar, apenas toggle a barra
-        if (menuState.currentPage === 'buscar') {
-            searchBar.classList.toggle('active');
-        } else {
-            navigateTo('buscar');
-        }
-    });
-
     sidebarLibrary.addEventListener('click', (e) => {
         e.preventDefault();
         navigateTo('biblioteca');
+    });
+
+    // Barra de busca sempre visível no topo
+    searchBar.classList.add('active');
+    
+    // Focus na busca quando clicar em qualquer lugar da barra
+    searchBar.addEventListener('click', () => {
+        const input = searchBar.querySelector('input');
+        if (input) input.focus();
     });
 
     // Favoritos

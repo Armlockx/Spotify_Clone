@@ -1,11 +1,43 @@
 // Sistema de playlists personalizadas
 import { Storage } from './storage.js';
+import { Auth } from './auth.js';
+import { supabase } from './supabaseClient.js';
 import { playSongNew } from './player.js';
 import { getAllSongs } from './data.js';
 
 export const Playlists = {
+    playlists: [],
+    activePlaylist: null,
+
     init() {
         this.createPlaylistUI();
+        Auth.onUpdate(user => {
+            if (user) {
+                this.loadPlaylists(user.id);
+            } else {
+                this.loadLocalPlaylists();
+            }
+        });
+    },
+
+    async loadPlaylists(userId) {
+        const { data, error } = await supabase
+            .from('playlists')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Erro ao carregar playlists do Supabase:', error);
+            this.loadLocalPlaylists();
+            return;
+        }
+        this.playlists = data || [];
+        this.renderPlaylists();
+    },
+
+    loadLocalPlaylists() {
+        this.playlists = Storage.getPlaylists();
         this.renderPlaylists();
     },
 
@@ -25,25 +57,39 @@ export const Playlists = {
         }
     },
 
-    showCreatePlaylistDialog() {
+    async showCreatePlaylistDialog() {
+        const user = Auth.getCurrentUser();
+        if (!user) {
+            this.showNotification('Você precisa estar logado para criar playlists.');
+            return;
+        }
         const name = prompt('Nome da playlist:');
         if (name && name.trim()) {
-            const playlist = Storage.createPlaylist(name.trim());
+            const { data, error } = await supabase
+                .from('playlists')
+                .insert({ name: name.trim(), user_id: user.id })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Erro ao criar playlist no Supabase:', error);
+                this.showNotification('Erro ao criar playlist.');
+                return;
+            }
+            this.playlists.push(data);
             this.renderPlaylists();
             this.showNotification(`Playlist "${name}" criada!`);
         }
     },
 
     renderPlaylists() {
-        const playlists = Storage.getPlaylists();
         const container = document.querySelector('.sidebar__playlists');
         if (!container) return;
 
-        // Limpa playlists antigas (exceto as estáticas)
         const customPlaylists = container.querySelectorAll('.playlist-custom');
         customPlaylists.forEach(p => p.remove());
 
-        playlists.forEach(playlist => {
+        this.playlists.forEach(playlist => {
             const item = document.createElement('div');
             item.className = 'sidebar__playlists__item playlist-custom';
             item.innerHTML = `
@@ -61,10 +107,25 @@ export const Playlists = {
             });
 
             const deleteBtn = item.querySelector('.playlist-delete-btn');
-            deleteBtn.addEventListener('click', (e) => {
+            deleteBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm(`Deseja deletar a playlist "${playlist.name}"?`)) {
-                    Storage.deletePlaylist(playlist.id);
+                    const user = Auth.getCurrentUser();
+                    if (user) {
+                        const { error } = await supabase
+                            .from('playlists')
+                            .delete()
+                            .eq('id', playlist.id)
+                            .eq('user_id', user.id);
+                        if (error) {
+                            console.error('Erro ao deletar playlist:', error);
+                            this.showNotification('Erro ao deletar playlist.');
+                            return;
+                        }
+                        this.playlists = this.playlists.filter(p => p.id !== playlist.id);
+                    } else {
+                        Storage.deletePlaylist(playlist.id);
+                    }
                     this.renderPlaylists();
                     this.showNotification('Playlist deletada');
                 }
@@ -82,10 +143,33 @@ export const Playlists = {
         return 'img/notFound.png';
     },
 
-    showPlaylist(playlistId) {
-        const playlists = Storage.getPlaylists();
-        const playlist = playlists.find(p => p.id === playlistId);
+    async showPlaylist(playlistId) {
+        const playlist = this.playlists.find(p => p.id === playlistId);
         if (!playlist) return;
+
+        const user = Auth.getCurrentUser();
+        if (user) {
+            const { data: playlistSongs, error } = await supabase
+                .from('playlist_songs')
+                .select('song_id')
+                .eq('playlist_id', playlistId)
+                .order('created_at', { ascending: true });
+
+            if (!error && playlistSongs) {
+                const songIds = playlistSongs.map(ps => ps.song_id);
+                if (songIds.length > 0) {
+                    const { data: songsData } = await supabase
+                        .from('songs')
+                        .select('*')
+                        .in('id', songIds);
+                    playlist.songs = songsData || [];
+                } else {
+                    playlist.songs = [];
+                }
+            }
+        } else {
+            playlist.songs = playlist.songs || [];
+        }
 
         // Cria seção de playlist na biblioteca
         const library = document.getElementById('library');
@@ -117,7 +201,7 @@ export const Playlists = {
         });
     },
 
-    renderPlaylistSongs(playlistId, songs) {
+    async renderPlaylistSongs(playlistId, songs) {
         const container = document.getElementById(`playlistSongs-${playlistId}`);
         if (!container) return;
 
@@ -135,7 +219,7 @@ export const Playlists = {
                 <img src="${song.cover}" alt="${song.name}">
                 <h3>${song.name}</h3>
                 <p>${song.artist}</p>
-                <button class="remove-from-playlist-btn" data-playlist-id="${playlistId}" data-index="${index}" aria-label="Remover da playlist">
+                <button class="remove-from-playlist-btn" data-playlist-id="${playlistId}" data-song-id="${song.id}" aria-label="Remover da playlist">
                     <i class="fas fa-times"></i>
                 </button>
             `;
@@ -148,7 +232,7 @@ export const Playlists = {
             const removeBtn = div.querySelector('.remove-from-playlist-btn');
             removeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.removeFromPlaylist(playlistId, index);
+                this.removeFromPlaylist(playlistId, song.id);
             });
 
             container.appendChild(div);
@@ -210,37 +294,74 @@ export const Playlists = {
         });
     },
 
-    addToPlaylist(playlistId, song) {
-        const playlists = Storage.getPlaylists();
-        const playlist = playlists.find(p => p.id === playlistId);
-        if (!playlist) return;
+    async addToPlaylist(playlistId, song) {
+        const user = Auth.getCurrentUser();
+        if (!user) {
+            this.showNotification('Você precisa estar logado para adicionar músicas a playlists.');
+            return;
+        }
 
-        // Verifica se já está na playlist
-        const songId = song.id || `${song.name}-${song.artist}`;
-        const exists = playlist.songs.some(s => (s.id || `${s.name}-${s.artist}`) === songId);
-        
-        if (exists) {
+        const { data: existingEntry, error: selectError } = await supabase
+            .from('playlist_songs')
+            .select('*')
+            .eq('playlist_id', playlistId)
+            .eq('song_id', song.id)
+            .single();
+
+        if (selectError && selectError.code !== 'PGRST116') {
+            console.error('Erro ao verificar música na playlist:', selectError);
+            this.showNotification('Erro ao adicionar música à playlist.');
+            return;
+        }
+
+        if (existingEntry) {
             this.showNotification('Música já está na playlist');
             return;
         }
 
-        playlist.songs.push(song);
-        Storage.updatePlaylist(playlistId, { songs: playlist.songs });
-        
-        // Atualiza visualização
-        this.renderPlaylistSongs(playlistId, playlist.songs);
+        const { error: insertError } = await supabase
+            .from('playlist_songs')
+            .insert({ playlist_id: playlistId, song_id: song.id });
+
+        if (insertError) {
+            console.error('Erro ao adicionar música à playlist:', insertError);
+            this.showNotification('Erro ao adicionar música à playlist.');
+            return;
+        }
+
+        const playlist = this.playlists.find(p => p.id === playlistId);
+        if (playlist) {
+            if (!playlist.songs) playlist.songs = [];
+            playlist.songs.push(song);
+            this.renderPlaylistSongs(playlistId, playlist.songs);
+        }
         this.showNotification('Música adicionada à playlist');
     },
 
-    removeFromPlaylist(playlistId, index) {
-        const playlists = Storage.getPlaylists();
-        const playlist = playlists.find(p => p.id === playlistId);
-        if (!playlist) return;
+    async removeFromPlaylist(playlistId, songId) {
+        const user = Auth.getCurrentUser();
+        if (!user) {
+            this.showNotification('Você precisa estar logado para remover músicas de playlists.');
+            return;
+        }
 
-        playlist.songs.splice(index, 1);
-        Storage.updatePlaylist(playlistId, { songs: playlist.songs });
-        
-        this.renderPlaylistSongs(playlistId, playlist.songs);
+        const { error: deleteError } = await supabase
+            .from('playlist_songs')
+            .delete()
+            .eq('playlist_id', playlistId)
+            .eq('song_id', songId);
+
+        if (deleteError) {
+            console.error('Erro ao remover música da playlist:', deleteError);
+            this.showNotification('Erro ao remover música da playlist.');
+            return;
+        }
+
+        const playlist = this.playlists.find(p => p.id === playlistId);
+        if (playlist) {
+            playlist.songs = playlist.songs.filter(s => s.id !== songId);
+            this.renderPlaylistSongs(playlistId, playlist.songs);
+        }
         this.showNotification('Música removida da playlist');
     },
 

@@ -2,6 +2,7 @@
 import { Storage } from './storage.js';
 import { playSongNew } from './player.js';
 import { loadSongs } from './data.js';
+import { supabase } from './supabaseClient.js';
 
 export const Upload = {
     init() {
@@ -164,99 +165,81 @@ export const Upload = {
         }
 
         try {
-            // Processa capa
-            let coverDataUrl = 'img/notFound.png';
-            if (coverFile) {
-                coverDataUrl = await this.processImageFile(coverFile);
-            }
+            const duration = await this.getAudioDuration(audioFile);
+            const trackUrl = await this.uploadFile('tracks', audioFile);
+            const coverUrl = coverFile
+                ? await this.uploadFile('covers', coverFile)
+                : 'img/notFound.png';
 
-            // Processa áudio
-            const song = await this.processAudioFile(audioFile, songName, artist, coverDataUrl);
-            
-            if (song) {
-                const uploadedSongs = Storage.getUploadedSongs();
-                uploadedSongs.push(song);
-                Storage.saveUploadedSongs(uploadedSongs);
-                
-                this.showSuccess('Música adicionada com sucesso!');
-                modal.remove();
-                loadSongs();
-            }
+            const session = await supabase.auth.getSession();
+            const userId = session?.data?.session?.user?.id || null;
+
+            const { data, error } = await supabase
+                .from('songs')
+                .insert({
+                    name: songName,
+                    artist,
+                    cover: coverUrl,
+                    file: trackUrl,
+                    duration: Math.floor(duration),
+                    uploaded: true,
+                    file_name: audioFile.name,
+                    user_id: userId
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // Update local storage for immediate display (fallback/cache)
+            const uploadedSongs = Storage.getUploadedSongs();
+            uploadedSongs.push(data);
+            Storage.saveUploadedSongs(uploadedSongs);
+
+            this.showSuccess('Música adicionada com sucesso!');
+            modal.remove();
+            loadSongs();
         } catch (error) {
             console.error('Erro ao processar upload:', error);
             this.showError(`Erro ao processar: ${error.message}`);
         }
     },
 
-    processImageFile(file) {
+    async getAudioDuration(file) {
         return new Promise((resolve, reject) => {
-            if (!file.type.startsWith('image/')) {
-                reject(new Error('Arquivo não é uma imagem válida'));
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = () => reject(new Error('Erro ao ler a imagem'));
-            reader.readAsDataURL(file);
+            const audio = new Audio();
+            audio.preload = 'metadata';
+            audio.src = URL.createObjectURL(file);
+            audio.addEventListener('loadedmetadata', () => {
+                URL.revokeObjectURL(audio.src);
+                resolve(audio.duration || 0);
+            }, { once: true });
+            audio.addEventListener('error', () => {
+                URL.revokeObjectURL(audio.src);
+                reject(new Error('Não foi possível ler o áudio'));
+            }, { once: true });
         });
     },
 
-    // Método antigo mantido para compatibilidade, mas não é mais usado
-    async handleFiles(files) {
-        // Redireciona para o modal
-        this.showUploadModal();
-    },
+    async uploadFile(bucket, file) {
+        const session = await supabase.auth.getSession();
+        const userId = session?.data?.session?.user?.id;
+        
+        const filePath = userId 
+            ? `${bucket}/${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+            : `${bucket}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        
+        const { error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-    processAudioFile(file, songName, artist, coverDataUrl) {
-        return new Promise((resolve, reject) => {
-            // Valida tipo de arquivo
-            if (!file.type.startsWith('audio/')) {
-                reject(new Error('Arquivo não é um áudio válido'));
-                return;
-            }
+        if (uploadError) throw uploadError;
 
-            // Usa FileReader para criar uma URL persistente
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                
-                // Cria elemento de áudio para obter metadata
-                const audio = new Audio();
-                audio.preload = 'metadata';
-                audio.src = dataUrl;
+        const {
+            data: { publicUrl }
+        } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
-                audio.addEventListener('loadedmetadata', () => {
-                    const song = {
-                        id: `uploaded-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                        name: songName || 'Música sem nome',
-                        artist: artist || 'Artista Desconhecido',
-                        cover: coverDataUrl || 'img/notFound.png',
-                        file: dataUrl, // Data URL persistente
-                        duration: Math.floor(audio.duration) || 0,
-                        uploaded: true,
-                        fileName: file.name,
-                        uploadDate: Date.now()
-                    };
-
-                    // Libera o áudio
-                    audio.src = '';
-                    resolve(song);
-                }, { once: true });
-
-                audio.addEventListener('error', () => {
-                    reject(new Error('Não foi possível carregar o arquivo de áudio'));
-                }, { once: true });
-            };
-
-            reader.onerror = () => {
-                reject(new Error('Erro ao ler o arquivo'));
-            };
-
-            // Lê o arquivo como data URL
-            reader.readAsDataURL(file);
-        });
+        return publicUrl;
     },
 
     showSuccess(message) {

@@ -1,0 +1,81 @@
+Pontos fortes
+Estrutura modular (player.js, data.js, ui.js, main.js)
+Gradiente dinâmico baseado nas cores da capa
+Navegação por teclado no sidebar
+Acessibilidade (ARIA labels)
+Design responsivo básico
+Melhorias sugeridas
+1. Refatoração de código
+Código duplicado: scripts.js e player.js têm lógica sobreposta
+Consolidar em módulos ES6
+Remover scripts.js ou migrar funcionalidades para os módulos
+2. Tratamento de erros
+Adicionar try-catch em operações assíncronas
+Mensagens de erro amigáveis ao usuário
+Fallback quando arquivos de áudio não carregam
+3. Performance
+Lazy loading de imagens
+Debounce na busca
+Cache de metadados de áudio
+Virtualização de listas longas
+4. Persistência de dados
+Salvar preferências no localStorage (volume, tema, última música)
+Histórico de reprodução
+Playlists personalizadas
+5. UX/UI
+Loading states (skeleton screens)
+Animações de transição
+Feedback visual em ações
+Toast notifications
+Novas funcionalidades sugeridas
+Prioridade alta
+Sistema de playlists
+Criar, editar, deletar playlists
+Adicionar/remover músicas
+Persistência no localStorage
+Favoritar músicas
+Botão de coração
+Lista de favoritos
+Filtro na biblioteca
+Modo aleatório (Shuffle)
+Botão shuffle no player
+Reprodução aleatória da lista
+Modo repetir (Repeat)
+Repetir uma, repetir todas, desativar
+Atalhos de teclado
+Espaço: play/pause
+Setas: próximo/anterior
+Ctrl+F: buscar
+M: mutar
+Prioridade média
+Filtros e ordenação
+Ordenar por nome, artista, duração
+Filtrar por artista, gênero
+Busca em tempo real
+Histórico de reprodução
+Últimas músicas tocadas
+Navegação no histórico
+Estatísticas
+Mais tocadas
+Artistas mais ouvidos
+Tempo total de reprodução
+Temas
+Dark/Light
+Cores personalizáveis
+Prioridade baixa
+Visualização de ondas (Waveform)
+Visualização do áudio em tempo real
+Equalizador
+Controles de frequência
+Letras
+Exibição de letras sincronizadas (se disponível)
+Compartilhamento
+Compartilhar músicas/playlists
+Links compartilháveis
+Importação
+Upload de arquivos de áudio
+Importação de playlists (JSON)
+Sincronização com Spotify
+Integração com API do Spotify (OAuth)
+Sincronizar playlists
+Quer que eu implemente alguma des

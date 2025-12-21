@@ -8,6 +8,16 @@
 	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 
+    <!-- Importmap para resolver módulos npm no navegador -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+        }
+    }
+    </script>
+    <script type="module" src="js/config.js"></script>
+
     <link rel="icon" type="image/x-icon" href="img/spotify.png">
 </head>
 <body>
@@ -25,7 +35,6 @@
 			</div>
 			<div class="sidebar__menu">
 				<a href="#" class="sidebar__menu__selected active" id="sidebarMenuSelected"><i class="fas fa-home"></i> Início</a>
-				<a href="#" class="sidebar__search" id="toggleSearchBarBtn"><i class="fas fa-search searchBtn"></i> Buscar</a>
 				<a href="#" class="sidebar__library" id="sidebarLibrary"><i class="fas fa-database"></i> Biblioteca</a>
 				<a href="#" class="sidebar__favorites" id="sidebarFavorites"><i class="fas fa-heart"></i> Favoritos</a>
 				<a href="#" class="sidebar__history" id="sidebarHistory"><i class="fas fa-history"></i> Histórico</a>
@@ -49,17 +58,17 @@
 
 			<div class="sidebar__playlists">
                 <div class="sidebar__playlists__item">
-                    <img src="img/matue.jpg">
-                    <a href="">Matuê Playlist</a>         
+                    <img src="https://placehold.co/600x400/black/white?text=3D+Viewer">
+                    <a href="/3d.html">3D Viewer</a>         
                 </div>
                 <div class="sidebar__playlists__item">
-                    <img src="img/deftones.jpg">
+                    <img src="https://placehold.co/600x400/EEE/31343C?font=playfair-display&text=Playfair%20Display">
                     <a href="">Deftones Playlist</a>         
                 </div><div class="sidebar__playlists__item">
-                    <img src="img/dance.jpg">
+                    <img src="https://placehold.co/600x400?text=Hello+World">
                     <a href="">The Last Shadow Puppets</a>         
                 </div><div class="sidebar__playlists__item">
-                    <img src="img/top50global.jpg">
+                    <img src="https://placehold.co/600x400/orange/white">
                     <a href="">Top 50 do Mundo</a>         
                 </div>
             </div>
@@ -223,7 +232,7 @@
         </div>
     </div>
 
-    <audio id="audioplayer" style="position: absolute; left: 0; top: 0; z-index: -999; opacity: 0;" controls="">
+    <audio id="audioplayer" style="position: absolute; left: 0; top: 0; z-index: -999; opacity: 0;" controls="" crossorigin="anonymous">
     </audio>
 
 
