@@ -69,14 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initializeSidebarNavigation() {
     // Elementos do DOM
-    const sidebarMenuSelected = document.getElementById('sidebarMenuSelected');
     const sidebarLibrary = document.getElementById('sidebarLibrary');
     const searchBar = document.getElementById('search__bar');
     const mainWraper = document.getElementById('mainWraper');
     const library = document.getElementById('library');
 
     // Validação
-    if (!sidebarMenuSelected || !sidebarLibrary) {
+    if (!sidebarLibrary) {
         console.error('Elementos do menu não encontrados');
         return;
     }
@@ -97,7 +96,8 @@ function initializeSidebarNavigation() {
      * Função para limpar todos os estados
      */
     function clearAllStates() {
-        sidebarMenuSelected.classList.remove('active');
+        const headerHomeBtn = document.getElementById('headerHomeBtn');
+        if (headerHomeBtn) headerHomeBtn.classList.remove('active');
         sidebarLibrary.classList.remove('active');
         if (sidebarFavorites) sidebarFavorites.classList.remove('active');
         if (sidebarHistory) sidebarHistory.classList.remove('active');
@@ -120,7 +120,8 @@ function initializeSidebarNavigation() {
 
         switch (page) {
             case 'inicio':
-                sidebarMenuSelected.classList.add('active');
+                const headerHomeBtn = document.getElementById('headerHomeBtn');
+                if (headerHomeBtn) headerHomeBtn.classList.add('active');
                 if (mainWraper) mainWraper.classList.remove('hidden');
                 break;
 
@@ -175,10 +176,14 @@ function initializeSidebarNavigation() {
     }
 
     // Event Listeners
-    sidebarMenuSelected.addEventListener('click', (e) => {
-        e.preventDefault();
-        navigateTo('inicio');
-    });
+    // Botão home no header
+    const headerHomeBtn = document.getElementById('headerHomeBtn');
+    if (headerHomeBtn) {
+        headerHomeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('inicio');
+        });
+    }
 
     sidebarLibrary.addEventListener('click', (e) => {
         e.preventDefault();

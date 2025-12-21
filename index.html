@@ -21,20 +21,31 @@
     <link rel="icon" type="image/x-icon" href="img/spotify.png">
 </head>
 <body>
-    <div id="search__bar" class="search__bar" role="search">
-        <i class="fas fa-search search-icon" aria-hidden="true"></i>
-        <input id="search_input" type="text" name="search__bar" placeholder='O que você quer ouvir?' aria-label="Pesquisar músicas">
+    <div class="header">
+        <div class="header-left">
+            <div class="sidebar__logo header-logo">
+                <a href="index.html">
+                    <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_White.png" alt="Logo do Spotify">
+                </a>
+            </div>
+        </div>
+        <div class="header-center">
+            <button class="header-home-btn" id="headerHomeBtn" aria-label="Início" title="Início">
+                <i class="fas fa-home"></i>
+            </button>
+            <div id="search__bar" class="search__bar" role="search">
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input id="search_input" type="text" name="search__bar" placeholder='O que você quer ouvir?' aria-label="Pesquisar músicas">
+            </div>
+        </div>
+        <div class="header-right">
+            <!-- Theme toggle and profile button will be appended here by JS -->
+        </div>
     </div>
 
 	<div class="sidebar">
 		<div class="sidebar-wraper">
-			<div class="sidebar__logo">
-                <a href="index.html">
-				<img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_White.png" alt="Logo do Spotify">
-                </a>
-			</div>
 			<div class="sidebar__menu">
-				<a href="#" class="sidebar__menu__selected active" id="sidebarMenuSelected"><i class="fas fa-home"></i> Início</a>
 				<a href="#" class="sidebar__library" id="sidebarLibrary"><i class="fas fa-database"></i> Biblioteca</a>
 				<a href="#" class="sidebar__favorites" id="sidebarFavorites"><i class="fas fa-heart"></i> Favoritos</a>
 				<a href="#" class="sidebar__history" id="sidebarHistory"><i class="fas fa-history"></i> Histórico</a>

@@ -45,8 +45,13 @@ const Auth = {
             this.showAuthModal();
         });
 
-        // Adiciona ao body (ao lado do toggle de tema)
-        document.body.appendChild(authBtn);
+        // Adiciona ao header-right (ao lado do botão de upload e toggle de tema)
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+            headerRight.appendChild(authBtn);
+        } else {
+            document.body.appendChild(authBtn);
+        }
         this.updateButton();
     },
 
@@ -128,69 +133,118 @@ const Auth = {
     showAuthModal() {
         const modal = document.createElement('div');
         modal.className = 'auth-modal modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content auth-modal-content">
-                <div class="modal-header">
-                    <h3>${this.currentUser ? 'Minha Conta' : 'Entrar'}</h3>
-                    <button class="modal-close-btn" id="authClose" aria-label="Fechar">&times;</button>
+        
+        // Se o usuário estiver logado, mostra modal de conta
+        if (this.currentUser) {
+            const profile = this.currentUser.profile || {};
+            const avatarUrl = profile.avatar_url || null;
+            const username = profile.username || this.currentUser.email?.split('@')[0] || 'Usuário';
+            const email = this.currentUser.email || '';
+            
+            modal.innerHTML = `
+                <div class="modal-content auth-modal-content account-modal">
+                    <div class="modal-header">
+                        <h3>Minha Conta</h3>
+                        <button class="modal-close-btn" id="authClose" aria-label="Fechar">&times;</button>
+                    </div>
+                    <div class="account-info">
+                        <div class="account-avatar">
+                            ${avatarUrl 
+                                ? `<img src="${avatarUrl}" alt="${username}" class="account-avatar-img">`
+                                : `<div class="account-avatar-placeholder">${username.substring(0, 2).toUpperCase()}</div>`
+                            }
+                        </div>
+                        <div class="account-details">
+                            <h4 class="account-username">${username}</h4>
+                            <p class="account-email">${email}</p>
+                        </div>
+                    </div>
+                    <div class="account-actions">
+                        <button class="btn-logout">Sair</button>
+                    </div>
                 </div>
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">Entrar</button>
-                    <button class="auth-tab" data-tab="register">Registrar</button>
+            `;
+        } else {
+            // Se não estiver logado, mostra modal de login/registro
+            modal.innerHTML = `
+                <div class="modal-content auth-modal-content">
+                    <div class="modal-header">
+                        <h3>Entrar</h3>
+                        <button class="modal-close-btn" id="authClose" aria-label="Fechar">&times;</button>
+                    </div>
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">Entrar</button>
+                        <button class="auth-tab" data-tab="register">Registrar</button>
+                    </div>
+                    <form id="loginForm" class="auth-form" data-tab="login">
+                        <div class="form-group">
+                            <label for="authEmail">Email</label>
+                            <input id="authEmail" type="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="authPassword">Senha</label>
+                            <input id="authPassword" type="password" required>
+                        </div>
+                        <div class="auth-error" id="loginError" style="display: none;"></div>
+                        <button type="submit" class="btn-submit">Entrar</button>
+                    </form>
+                    <form id="registerForm" class="auth-form" data-tab="register" style="display:none;">
+                        <div class="form-group">
+                            <label for="authEmailRegister">Email</label>
+                            <input id="authEmailRegister" type="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="authUsernameRegister">Nome de usuário (3-30 caracteres)</label>
+                            <input id="authUsernameRegister" type="text" required pattern="[a-zA-Z0-9_-]{3,30}" title="3-30 caracteres, apenas letras, números, _ e -">
+                            <small>Apenas letras, números, _ e -</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Senha</label>
+                            <input id="registerPassword" type="password" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">Confirmar Senha</label>
+                            <input type="password" id="registerPasswordConfirm" placeholder="Digite a senha novamente" required autocomplete="new-password" minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerAvatar" style="color: var(--text-secondary); font-size: 14px;">Imagem de perfil (opcional)</label>
+                            <input type="file" id="registerAvatar" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
+                            <small>Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</small>
+                        </div>
+                        <div class="auth-error" id="registerError" style="display: none;"></div>
+                        <button type="submit" class="btn-submit">Registrar</button>
+                    </form>
                 </div>
-                <form id="loginForm" class="auth-form" data-tab="login">
-                    <div class="form-group">
-                        <label for="authEmail">Email</label>
-                        <input id="authEmail" type="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="authPassword">Senha</label>
-                        <input id="authPassword" type="password" required>
-                    </div>
-                    <div class="auth-error" id="loginError" style="display: none;"></div>
-                    <button type="submit" class="btn-submit">Entrar</button>
-                </form>
-                <form id="registerForm" class="auth-form" data-tab="register" style="display:none;">
-                    <div class="form-group">
-                        <label for="authEmailRegister">Email</label>
-                        <input id="authEmailRegister" type="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="authUsernameRegister">Nome de usuário (3-30 caracteres)</label>
-                        <input id="authUsernameRegister" type="text" required pattern="[a-zA-Z0-9_-]{3,30}" title="3-30 caracteres, apenas letras, números, _ e -">
-                        <small>Apenas letras, números, _ e -</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPassword">Senha</label>
-                        <input id="registerPassword" type="password" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" minlength="8">
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPasswordConfirm">Confirmar Senha</label>
-                        <input type="password" id="registerPasswordConfirm" placeholder="Digite a senha novamente" required autocomplete="new-password" minlength="8">
-                    </div>
-                    <div class="form-group">
-                        <label for="registerAvatar" style="color: var(--text-secondary); font-size: 14px;">Imagem de perfil (opcional)</label>
-                        <input type="file" id="registerAvatar" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
-                        <small>Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</small>
-                    </div>
-                    <div class="auth-error" id="registerError" style="display: none;"></div>
-                    <button type="submit" class="btn-submit">Registrar</button>
-                </form>
-                ${this.currentUser ? '<button class="btn-logout">Sair</button>' : ''}
-            </div>
-        `;
+            `;
+        }
+        
         document.body.appendChild(modal);
         this.attachAuthModalEvents(modal);
     },
 
     attachAuthModalEvents(modal) {
         const closeBtn = modal.querySelector('#authClose');
-        closeBtn.addEventListener('click', () => modal.remove());
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => modal.remove());
+        }
 
         modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.remove();
         });
 
+        // Se o usuário estiver logado, apenas anexa eventos do botão de logout
+        if (this.currentUser) {
+            const logoutBtn = modal.querySelector('.btn-logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    this.logout();
+                    modal.remove();
+                });
+            }
+            return; // Não precisa anexar eventos de login/registro
+        }
+
+        // Se não estiver logado, anexa eventos dos formulários de login/registro
         // Tabs
         const tabs = modal.querySelectorAll('.auth-tab');
         tabs.forEach(tab => {
@@ -202,31 +256,26 @@ const Auth = {
 
         // Login form
         const loginForm = modal.querySelector('#loginForm');
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.querySelector('#authEmail').value.trim();
-            const password = loginForm.querySelector('#authPassword').value.trim();
-            await this.signIn(email, password);
-        });
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = loginForm.querySelector('#authEmail').value.trim();
+                const password = loginForm.querySelector('#authPassword').value.trim();
+                await this.signIn(email, password);
+            });
+        }
 
         // Register form
         const registerForm = modal.querySelector('#registerForm');
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = registerForm.querySelector('#authEmailRegister').value.trim();
-            const username = registerForm.querySelector('#authUsernameRegister').value.trim();
-            const password = registerForm.querySelector('#registerPassword').value.trim();
-            const confirmPassword = registerForm.querySelector('#registerPasswordConfirm').value.trim();
-            const avatarFile = registerForm.querySelector('#registerAvatar').files[0];
-            await this.signUp(email, username, password, confirmPassword, avatarFile);
-        });
-
-        // Logout button
-        const logoutBtn = modal.querySelector('.btn-logout');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                this.logout();
-                modal.remove();
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = registerForm.querySelector('#authEmailRegister').value.trim();
+                const username = registerForm.querySelector('#authUsernameRegister').value.trim();
+                const password = registerForm.querySelector('#registerPassword').value.trim();
+                const confirmPassword = registerForm.querySelector('#registerPasswordConfirm').value.trim();
+                const avatarFile = registerForm.querySelector('#registerAvatar').files[0];
+                await this.signUp(email, username, password, confirmPassword, avatarFile);
             });
         }
     },

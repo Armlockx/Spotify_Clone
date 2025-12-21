@@ -43,8 +43,13 @@ export const Theme = {
             this.toggleTheme();
         });
 
-        // Adiciona ao body (canto superior direito)
-        document.body.appendChild(toggle);
+        // Adiciona ao header-right
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+            headerRight.appendChild(toggle);
+        } else {
+            document.body.appendChild(toggle);
+        }
 
         this.updateThemeToggle(document.documentElement.getAttribute('data-theme') || 'dark');
     },

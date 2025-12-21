@@ -10,31 +10,28 @@ export const Upload = {
     },
 
     createUploadButton() {
-        const sidebar = document.querySelector('.sidebar__menu');
-        if (!sidebar) return;
+        const headerRight = document.querySelector('.header-right');
+        if (!headerRight) return;
 
         // Verifica se já existe
         if (document.getElementById('uploadBtn')) return;
 
-        const uploadBtn = document.createElement('a');
+        const uploadBtn = document.createElement('button');
         uploadBtn.id = 'uploadBtn';
-        uploadBtn.href = '#';
-        uploadBtn.className = 'sidebar__upload';
-        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Enviar Música';
-        uploadBtn.setAttribute('aria-label', 'Enviar arquivo de áudio');
-        uploadBtn.setAttribute('role', 'button');
+        uploadBtn.className = 'header-upload-btn';
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i>';
+        uploadBtn.setAttribute('aria-label', 'Enviar música');
+        uploadBtn.setAttribute('title', 'Enviar música');
+        uploadBtn.setAttribute('type', 'button');
 
         uploadBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             this.showUploadModal();
         });
         
-        const library = document.getElementById('sidebarLibrary');
-        if (library && library.parentNode) {
-            library.parentNode.insertBefore(uploadBtn, library);
-        } else {
-            sidebar.appendChild(uploadBtn);
-        }
+        // Insere antes do theme toggle e profile button
+        headerRight.insertBefore(uploadBtn, headerRight.firstChild);
     },
 
     showUploadModal() {
