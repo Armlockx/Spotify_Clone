@@ -51,11 +51,24 @@ export const History = {
 
     async displayHistorySongs(container, onSongClick) {
         const user = Auth.getCurrentUser();
-        const history = user ? await this.getRemoteForDisplay(user.id) : this.get();
-        container.innerHTML = '';
+        if (!user) {
+            // Não deve ser chamado se usuário não está logado, mas por segurança
+            return;
+        }
+        
+        const history = await this.getRemoteForDisplay(user.id);
+        
+        // Limpar conteúdo anterior
+        const oldSongs = container.querySelectorAll('.songRow, .historyRow');
+        oldSongs.forEach(s => s.remove());
+        const oldMessages = container.querySelectorAll('p[style*="text-align: center"]');
+        oldMessages.forEach(m => m.remove());
 
-        if (history.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); padding: 20px; text-align: center;">Nenhuma música no histórico</p>';
+        if (!history || history.length === 0) {
+            const emptyMsg = document.createElement('p');
+            emptyMsg.style.cssText = 'color: var(--text-secondary); padding: 20px; text-align: center;';
+            emptyMsg.textContent = 'Nenhuma música no histórico';
+            container.appendChild(emptyMsg);
             return;
         }
 

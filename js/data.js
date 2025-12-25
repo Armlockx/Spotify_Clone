@@ -10,6 +10,9 @@ let allSongs = [];
 let filterListenerAttached = false;
 
 export async function loadSongs() {
+    // Mostrar loading
+    showLoading();
+    
     try {
         // Fetch songs from Supabase only
         const { data: supabaseSongs, error } = await supabase
@@ -29,8 +32,8 @@ export async function loadSongs() {
         
         Filters.populateFilterOptions(allSongs);
         const filteredSongs = Filters.getFilteredAndSortedSongs(allSongs);
-        displaySongs(filteredSongs);
-        displayLibrarySongs(filteredSongs);
+        await displaySongs(filteredSongs);
+        await displayLibrarySongs(filteredSongs);
 
         // Atualiza botões de favorito após renderizar (busca todos de uma vez)
         Favorites.updateFavoriteButtons();
@@ -42,6 +45,9 @@ export async function loadSongs() {
     } catch (error) {
         console.error('Erro ao carregar músicas:', error);
         showError('Erro ao carregar músicas. Por favor, recarregue a página.');
+    } finally {
+        // Esconder loading
+        hideLoading();
     }
 }
 
@@ -57,7 +63,7 @@ export function verifyFields(song) {
     return song;
 }
 
-export function displaySongs(songs) {
+export async function displaySongs(songs) {
     const container = document.querySelector('.main__row');
     if (!container) return;
 
@@ -69,18 +75,22 @@ export function displaySongs(songs) {
         return;
     }
 
-    songs.forEach(song => {
+    // Criar todos os elementos de uma vez para melhor performance
+    const songElements = await Promise.all(songs.map(async (song) => {
         song = verifyFields(song);
 
         const divSong = document.createElement('div');
         divSong.classList.add('main__col');
         divSong.dataset.songId = song.id; // Adiciona ID para facilitar busca
+        if (song.uploaded) {
+            divSong.dataset.uploaded = 'true'; // Marca como música enviada
+        }
         
         // Adiciona botão de favorito
         const favoriteBtn = Favorites.createFavoriteButton(song, divSong);
         
-        // Adiciona botão de deletar se for música enviada
-        const deleteBtn = Delete.createDeleteButton(song, divSong);
+        // Adiciona botão de deletar se for música enviada (async)
+        const deleteBtn = await Delete.createDeleteButton(song, divSong);
         
         divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}" loading="lazy">
@@ -106,11 +116,14 @@ export function displaySongs(songs) {
             divSong.title = 'Arquivo de áudio não disponível';
         }
 
-        container.appendChild(divSong);
-    });
+        return divSong;
+    }));
+
+    // Adicionar todos os elementos ao container
+    songElements.forEach(divSong => container.appendChild(divSong));
 }
 
-export function displayLibrarySongs(songs) {
+export async function displayLibrarySongs(songs) {
     const library = document.getElementById('library');
     if (!library) {
         console.error('Elemento #library não encontrado');
@@ -123,12 +136,16 @@ export function displayLibrarySongs(songs) {
     const oldSongs = library.querySelectorAll('.songRow');
     oldSongs.forEach(song => song.remove());
 
-    songs.forEach(song => {
+    // Criar todos os elementos de uma vez para melhor performance
+    const songElements = await Promise.all(songs.map(async (song) => {
         song = verifyFields(song);
 
         const divSong = document.createElement('div');
         divSong.classList.add('songRow');
         divSong.dataset.songId = song.id; // Adiciona ID para facilitar busca
+        if (song.uploaded) {
+            divSong.dataset.uploaded = 'true'; // Marca como música enviada
+        }
 
         // duration value (may be 0 if not known)
         const duration = song.duration || 0;
@@ -138,8 +155,8 @@ export function displayLibrarySongs(songs) {
         // Adiciona botão de favorito
         const favoriteBtn = Favorites.createFavoriteButton(song, divSong);
         
-        // Adiciona botão de deletar se for música enviada
-        const deleteBtn = Delete.createDeleteButton(song, divSong);
+        // Adiciona botão de deletar se for música enviada (async)
+        const deleteBtn = await Delete.createDeleteButton(song, divSong);
         
         divSong.innerHTML = `
             <img src="${song.cover}" alt="${song.name}" loading="lazy">
@@ -190,8 +207,11 @@ export function displayLibrarySongs(songs) {
             divSong.title = 'Arquivo de áudio não disponível';
         }
 
-        library.appendChild(divSong);
-    });
+        return divSong;
+    }));
+
+    // Adicionar todos os elementos ao container
+    songElements.forEach(divSong => library.appendChild(divSong));
 }
 
 export function formatSongDuration(seconds) {
@@ -200,10 +220,10 @@ export function formatSongDuration(seconds) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-function applyFilters() {
+async function applyFilters() {
     const filtered = Filters.getFilteredAndSortedSongs(allSongs);
-    displaySongs(filtered);
-    displayLibrarySongs(filtered);
+    await displaySongs(filtered);
+    await displayLibrarySongs(filtered);
 }
 
 function showError(message) {
@@ -217,4 +237,34 @@ function showError(message) {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+function showLoading() {
+    let loader = document.getElementById('songsLoader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'songsLoader';
+        loader.className = 'songs-loader';
+        loader.innerHTML = `
+            <div class="loader-content">
+                <div class="loader-spinner"></div>
+                <p class="loader-text">Carregando músicas...</p>
+            </div>
+        `;
+        document.body.appendChild(loader);
+    }
+    loader.classList.add('active');
+}
+
+function hideLoading() {
+    const loader = document.getElementById('songsLoader');
+    if (loader) {
+        loader.classList.remove('active');
+        // Remover após animação
+        setTimeout(() => {
+            if (loader && !loader.classList.contains('active')) {
+                loader.remove();
+            }
+        }, 300);
+    }
 }

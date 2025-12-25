@@ -260,7 +260,9 @@ function initializeSidebarNavigation() {
                 if (sidebarHistory) sidebarHistory.classList.add('active');
                 if (historyLibrary) {
                     historyLibrary.classList.add('active');
-                    displayHistory();
+                    displayHistory().catch(err => {
+                        console.error('Erro ao exibir histórico:', err);
+                    });
                 }
                 break;
         }
@@ -397,22 +399,41 @@ async function displayFavorites() {
     if (container) {
         // Garantir que favorites é um array
         const favoritesArray = Array.isArray(favorites) ? favorites : [];
-        displaySongsInLibrary(container, favoritesArray);
+        await displaySongsInLibrary(container, favoritesArray);
         // Atualizar botões de favorito após renderizar (todos devem estar ativos)
         await Favorites.updateFavoriteButtons();
     }
 }
 
-function displayHistory() {
+async function displayHistory() {
+    const { Auth } = await import('./auth.js');
+    const user = Auth.getCurrentUser();
     const container = document.getElementById('historyLibrary');
+    
+    if (!user) {
+        // Usuário não logado - mostrar mensagem
+        if (container) {
+            const oldSongs = container.querySelectorAll('.songRow, .historyRow');
+            oldSongs.forEach(s => s.remove());
+            const oldMessages = container.querySelectorAll('p[style*="text-align: center"]');
+            oldMessages.forEach(m => m.remove());
+            
+            const emptyMsg = document.createElement('p');
+            emptyMsg.style.cssText = 'color: var(--text-secondary); padding: 20px; text-align: center;';
+            emptyMsg.textContent = 'Faça login para ver seu histórico';
+            container.appendChild(emptyMsg);
+        }
+        return;
+    }
+    
     if (container) {
-        History.displayHistorySongs(container, (song) => {
+        await History.displayHistorySongs(container, (song) => {
             playSongNew(song);
         });
     }
 }
 
-function displaySongsInLibrary(container, songs) {
+async function displaySongsInLibrary(container, songs) {
     // Garantir que songs é um array
     if (!Array.isArray(songs)) {
         console.error('displaySongsInLibrary: songs não é um array', songs);
@@ -435,12 +456,16 @@ function displaySongsInLibrary(container, songs) {
         return;
     }
 
-    songs.forEach(song => {
+    // Criar todos os elementos de uma vez para melhor performance
+    const songElements = await Promise.all(songs.map(async (song) => {
         song = verifyFields(song);
         
         const div = document.createElement('div');
         div.className = 'songRow';
         div.dataset.songId = song.id; // Adiciona ID para facilitar busca
+        if (song.uploaded) {
+            div.dataset.uploaded = 'true'; // Marca como música enviada
+        }
         
         const duration = song.duration || 0;
         const minutes = Math.floor(duration / 60);
@@ -449,8 +474,8 @@ function displaySongsInLibrary(container, songs) {
         // Adiciona botão de favorito
         const favoriteBtn = Favorites.createFavoriteButton(song, div);
         
-        // Adiciona botão de deletar se for música enviada
-        const deleteBtn = Delete.createDeleteButton(song, div);
+        // Adiciona botão de deletar se for música enviada (async)
+        const deleteBtn = await Delete.createDeleteButton(song, div);
         
         div.innerHTML = `
             <img src="${song.cover}" alt="${song.name}" loading="lazy">
@@ -478,13 +503,16 @@ function displaySongsInLibrary(container, songs) {
             div.title = 'Arquivo de áudio não disponível';
         }
 
-        container.appendChild(div);
-    });
+        return div;
+    }));
+
+    // Adicionar todos os elementos ao container
+    songElements.forEach(div => container.appendChild(div));
 }
 
-function performSearch(query) {
+async function performSearch(query) {
     if (!query || query.trim() === '') {
-        loadSongs();
+        await loadSongs();
         return;
     }
 
@@ -495,6 +523,6 @@ function performSearch(query) {
                song.artist.toLowerCase().includes(searchTerm);
     });
 
-    displaySongs(filtered);
-    displayLibrarySongs(filtered);
+    await displaySongs(filtered);
+    await displayLibrarySongs(filtered);
 }
