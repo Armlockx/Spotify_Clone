@@ -3,6 +3,7 @@ import { Storage } from './storage.js';
 import { playSongNew } from './player.js';
 import { loadSongs } from './data.js';
 import { supabase } from './supabaseClient.js';
+import { Auth } from './auth.js';
 
 export const Upload = {
     init() {
@@ -35,6 +36,15 @@ export const Upload = {
     },
 
     showUploadModal() {
+        // Verificar se o usuário está logado
+        const user = Auth.getCurrentUser();
+        if (!user) {
+            this.showError('Você precisa estar logado para enviar músicas. Por favor, faça login primeiro.');
+            // Abrir modal de autenticação
+            Auth.showAuthModal();
+            return;
+        }
+
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.id = 'uploadModal';
@@ -140,6 +150,15 @@ export const Upload = {
     },
 
     async handleUploadFromModal(modal) {
+        // Verificar autenticação novamente antes de fazer upload
+        const user = Auth.getCurrentUser();
+        if (!user) {
+            this.showError('Você precisa estar logado para enviar músicas. Por favor, faça login primeiro.');
+            modal.remove();
+            Auth.showAuthModal();
+            return;
+        }
+
         const audioFile = modal.querySelector('#uploadAudioFile').files[0];
         const songName = modal.querySelector('#uploadSongName').value.trim();
         const artist = modal.querySelector('#uploadArtist').value.trim();

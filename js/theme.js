@@ -4,14 +4,40 @@ import { Storage } from './storage.js';
 export const Theme = {
     init() {
         const prefs = Storage.getPreferences();
-        this.setTheme(prefs.theme || 'dark');
+        const initialTheme = prefs.theme || 'dark';
+        document.documentElement.setAttribute('data-theme', initialTheme);
+        Storage.updatePreference('theme', initialTheme);
+        this.updateThemeToggle(initialTheme);
         this.createThemeToggle();
+        // Atualiza iframe do Spotify após um pequeno delay para garantir que está carregado
+        setTimeout(() => {
+            this.updateSpotifyIframeTheme(initialTheme);
+        }, 100);
     },
 
     setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         Storage.updatePreference('theme', theme);
         this.updateThemeToggle(theme);
+        this.updateSpotifyIframeTheme(theme);
+    },
+    
+    updateSpotifyIframeTheme(theme) {
+        const iframe = document.getElementById('spotifyPlaylistIframe');
+        if (!iframe) return;
+        
+        // Spotify iframe theme: 0 = light, 1 = dark
+        const spotifyTheme = theme === 'dark' ? '1' : '0';
+        const currentSrc = iframe.src;
+        
+        // Atualiza o parâmetro theme na URL
+        const newSrc = currentSrc.replace(/[?&]theme=\d+/, '') + 
+                      (currentSrc.includes('?') ? '&' : '?') + 
+                      `theme=${spotifyTheme}`;
+        
+        if (currentSrc !== newSrc) {
+            iframe.src = newSrc;
+        }
     },
 
     toggleTheme() {

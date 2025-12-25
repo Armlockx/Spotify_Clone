@@ -1,5 +1,5 @@
 import player from './player.js';
-import { loadSongs, getAllSongs, displaySongs, displayLibrarySongs } from './data.js';
+import { loadSongs, getAllSongs, displaySongs, displayLibrarySongs, verifyFields } from './data.js';
 import { setRangeBackground } from './ui.js';
 import { Theme } from './theme.js';
 import { Keyboard } from './keyboard.js';
@@ -23,16 +23,122 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicializa visual do range de volume
     const volumeControl = document.getElementById('volumeControl');
-    if (volumeControl) {
-        setRangeBackground(volumeControl);
+    const volumeIcon = document.getElementById('volumeIcon');
+    const audioPlayer = document.getElementById('audioplayer');
+    
+    if (volumeControl && volumeIcon) {
+        
+        // Função para atualizar a barra visual do volume
+        const updateVolumeProgress = (volume) => {
+            const percent = (volume * 100).toFixed(0);
+            volumeControl.style.setProperty('--volume-percent', `${percent}%`);
+        };
+        
+        // Função para atualizar ícone de volume com 4 níveis
+        const updateVolumeIcon = (volume, isMuted = false) => {
+            if (!volumeIcon) return;
+            
+            let iconClass = 'fas volume-icon';
+            
+            if (isMuted || volume === 0) {
+                // Nível 0: Mutado - mostrar X (fa-volume-mute)
+                iconClass += ' fa-volume-mute';
+            } else if (volume <= 0.33) {
+                // Nível 1: 1-33% - mostrar 1 risco (fa-volume-off)
+                iconClass += ' fa-volume-off';
+            } else if (volume <= 0.66) {
+                // Nível 2: 34-66% - mostrar 2 riscos (fa-volume-down)
+                iconClass += ' fa-volume-down';
+            } else {
+                // Nível 3: 67-100% - mostrar 3 riscos (fa-volume-up)
+                iconClass += ' fa-volume-up';
+            }
+            
+            volumeIcon.className = iconClass;
+        };
+        
+        // Função para atualizar tudo
+        const updateVolumeDisplay = (volume, isMuted = false) => {
+            updateVolumeProgress(isMuted ? 0 : volume);
+            updateVolumeIcon(volume, isMuted);
+            if (audioPlayer) {
+                volumeControl.setAttribute('aria-valuenow', Math.round(volume * 100));
+            }
+        };
+        
+        // Atualiza ao mudar volume com o slider
         volumeControl.addEventListener('input', () => {
-            setRangeBackground(volumeControl);
-            const audioPlayer = document.getElementById('audioplayer');
             if (audioPlayer) {
                 const vol = Number(volumeControl.value);
+                audioPlayer.muted = false; // Desmuta se estava mutado
                 audioPlayer.volume = vol;
-                volumeControl.setAttribute('aria-valuenow', vol);
                 Storage.updatePreference('volume', vol);
+                updateVolumeDisplay(vol, false);
+            }
+        });
+        
+        // Scroll do mouse para ajustar volume
+        volumeControl.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (!audioPlayer) return;
+            
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            const currentVol = audioPlayer.muted ? 0 : audioPlayer.volume;
+            let newVol = Math.max(0, Math.min(1, currentVol + delta));
+            
+            audioPlayer.muted = false;
+            audioPlayer.volume = newVol;
+            volumeControl.value = newVol;
+            Storage.updatePreference('volume', newVol);
+            updateVolumeDisplay(newVol, false);
+        }, { passive: false });
+        
+        // Atualiza quando volume muda externamente (teclado, etc)
+        if (audioPlayer) {
+            audioPlayer.addEventListener('volumechange', () => {
+                const vol = audioPlayer.volume;
+                const muted = audioPlayer.muted;
+                volumeControl.value = vol;
+                updateVolumeDisplay(vol, muted);
+            });
+            
+            // Inicializa valores
+            const initialVol = audioPlayer.volume !== undefined ? audioPlayer.volume : (Number(volumeControl.value) || 1);
+            const initialMuted = audioPlayer.muted || false;
+            updateVolumeDisplay(initialVol, initialMuted);
+        } else {
+            // Inicializa a barra visual mesmo se não houver audioPlayer ainda
+            const initialVol = Number(volumeControl.value) || 1;
+            updateVolumeProgress(initialVol);
+            updateVolumeIcon(initialVol, false);
+        }
+        
+        // Clique no ícone para mutar/desmutar
+        volumeIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!audioPlayer) return;
+            
+            const wasMuted = audioPlayer.muted;
+            const currentVolume = audioPlayer.volume || Number(volumeControl.value) || 1;
+            
+            // Toggle mute
+            audioPlayer.muted = !wasMuted;
+            
+            // Se estava mutado e vai desmutar, restaura o volume anterior
+            if (wasMuted) {
+                const savedVol = Number(volumeControl.value) || currentVolume || 1;
+                audioPlayer.volume = savedVol;
+                volumeControl.value = savedVol;
+                Storage.updatePreference('volume', savedVol);
+                // Atualiza display com volume restaurado e não mutado
+                updateVolumeDisplay(savedVol, false);
+            } else {
+                // Se vai mutar, mantém o valor do slider mas zera a barra visual
+                // Salva o volume atual antes de mutar
+                volumeControl.value = currentVolume;
+                updateVolumeDisplay(currentVolume, true);
             }
         });
     }
@@ -144,7 +250,9 @@ function initializeSidebarNavigation() {
                 if (sidebarFavorites) sidebarFavorites.classList.add('active');
                 if (favoritesLibrary) {
                     favoritesLibrary.classList.add('active');
-                    displayFavorites();
+                    displayFavorites().catch(err => {
+                        console.error('Erro ao exibir favoritos:', err);
+                    });
                 }
                 break;
 
@@ -263,12 +371,35 @@ function initializeSidebarNavigation() {
 }
 
 // Funções auxiliares
-function displayFavorites() {
-    const allSongs = getAllSongs();
-    const favorites = Favorites.getFavoriteSongs(allSongs);
+async function displayFavorites() {
+    const { Auth } = await import('./auth.js');
+    const user = Auth.getCurrentUser();
     const container = document.getElementById('favoritesLibrary');
+    
+    if (!user) {
+        // Usuário não logado - mostrar mensagem
+        if (container) {
+            const oldSongs = container.querySelectorAll('.songRow');
+            oldSongs.forEach(s => s.remove());
+            const oldMessages = container.querySelectorAll('p[style*="text-align: center"]');
+            oldMessages.forEach(m => m.remove());
+            
+            const emptyMsg = document.createElement('p');
+            emptyMsg.style.cssText = 'color: var(--text-secondary); padding: 20px; text-align: center;';
+            emptyMsg.textContent = 'Faça login para ver seus favoritos';
+            container.appendChild(emptyMsg);
+        }
+        return;
+    }
+
+    const allSongs = getAllSongs();
+    const favorites = await Favorites.getFavoriteSongs(allSongs);
     if (container) {
-        displaySongsInLibrary(container, favorites);
+        // Garantir que favorites é um array
+        const favoritesArray = Array.isArray(favorites) ? favorites : [];
+        displaySongsInLibrary(container, favoritesArray);
+        // Atualizar botões de favorito após renderizar (todos devem estar ativos)
+        await Favorites.updateFavoriteButtons();
     }
 }
 
@@ -282,6 +413,12 @@ function displayHistory() {
 }
 
 function displaySongsInLibrary(container, songs) {
+    // Garantir que songs é um array
+    if (!Array.isArray(songs)) {
+        console.error('displaySongsInLibrary: songs não é um array', songs);
+        songs = [];
+    }
+
     // Remove apenas as músicas, mantendo o header
     const oldSongs = container.querySelectorAll('.songRow');
     oldSongs.forEach(s => s.remove());
@@ -299,22 +436,47 @@ function displaySongsInLibrary(container, songs) {
     }
 
     songs.forEach(song => {
+        song = verifyFields(song);
+        
         const div = document.createElement('div');
         div.className = 'songRow';
+        div.dataset.songId = song.id; // Adiciona ID para facilitar busca
+        
         const duration = song.duration || 0;
         const minutes = Math.floor(duration / 60);
         const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
         
+        // Adiciona botão de favorito
+        const favoriteBtn = Favorites.createFavoriteButton(song, div);
+        
+        // Adiciona botão de deletar se for música enviada
+        const deleteBtn = Delete.createDeleteButton(song, div);
+        
         div.innerHTML = `
-            <img src="${song.cover}" alt="${song.name}">
+            <img src="${song.cover}" alt="${song.name}" loading="lazy">
             <h3>${song.name}</h3>
-            <p>${song.artist}</p>
-            <p>${minutes}:${seconds}</p>
+            <p class="songArtist">${song.artist}</p>
+            <p class="songDuration">${minutes}:${seconds}</p>
         `;
+        
+        // Adiciona botões
+        div.appendChild(favoriteBtn);
+        if (deleteBtn) div.appendChild(deleteBtn);
 
-        div.addEventListener('click', () => {
-            playSongNew(song);
-        });
+        if (song.file !== '#') {
+            div.addEventListener('click', (e) => {
+                // Não dispara se clicar nos botões
+                if (e.target.closest('.favorite-btn') || e.target.closest('.delete-btn')) return;
+                
+                document.querySelectorAll('.songRow').forEach(i => i.classList.remove('active'));
+                div.classList.add('active');
+                playSongNew(song);
+                History.add(song);
+            });
+        } else {
+            div.style.opacity = '0.6';
+            div.title = 'Arquivo de áudio não disponível';
+        }
 
         container.appendChild(div);
     });
